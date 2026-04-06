@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShoppingCart, Eye, EyeOff, ArrowUpRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('admin@barakostore.com');
@@ -39,100 +40,97 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#E6E8FF] p-4 font-body">
-      {/* Main White Card Container */}
-      <div className="w-full max-w-[1200px] rounded-[24px] bg-white shadow-2xl shadow-indigo-200/50 overflow-hidden flex flex-col min-h-[800px]">
-        
-        {/* Top Navigation / Logo Area */}
-        <header className="flex h-24 items-center px-12 border-b border-slate-50">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3338A0] text-white">
-              <ShoppingCart className="h-5 w-5" />
-            </div>
-            <div className="text-xl font-black tracking-tight">
-              <span className="text-[#3338A0]">Barako</span>
-              <span className="ml-1 text-[#444]">Store</span>
+    <div className="flex min-h-screen w-full items-center justify-center bg-white p-6 font-body">
+      <div className="w-full max-w-[440px] space-y-8">
+        {/* Branded Logo/Title Section */}
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
+              <ShoppingCart className="h-7 w-7" />
             </div>
           </div>
-        </header>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight">
+            <span className="text-primary">Barako</span>
+            <span className="ml-2 text-slate-900">Store</span>
+          </h1>
+          <p className="text-slate-500 font-medium">Management & POS System</p>
+        </div>
 
-        {/* Center Login Content */}
-        <main className="flex-1 flex flex-col items-center justify-center py-12 px-6">
-          <div className="w-full max-w-[420px] space-y-10">
-            {/* Branded Title Section */}
-            <div className="text-center mb-2">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-                <span className="text-[#3338A0]">Barako</span>
-                <span className="ml-2 text-[#FCC61D]">Store</span>
-              </h1>
-              <p className="text-slate-500 font-medium mt-4">Management & POS System</p>
+        {/* Login Card */}
+        <div className="bg-white rounded-[32px] p-8 md:p-10 border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Email Address</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="admin@barakostore.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+                className="h-12 border-slate-200 bg-slate-50/50 rounded-2xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0 px-4 transition-all"
+              />
             </div>
 
-            {/* Login Form */}
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email</Label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-500">Password</Label>
+                <button type="button" className="text-xs font-bold text-primary hover:underline">Forgot?</button>
+              </div>
+              <div className="relative">
                 <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="mail@example.com" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required 
-                  className="h-12 border-slate-200 bg-white rounded-xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0"
+                  className="h-12 border-slate-200 bg-slate-50/50 rounded-2xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0 pr-12 px-4 transition-all"
                 />
+                <button 
+                  type="button" 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-semibold text-slate-700">Password</Label>
-                <div className="relative">
-                  <Input 
-                    id="password" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Min. 8 characters" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required 
-                    className="h-12 border-slate-200 bg-white rounded-xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0 pr-12"
-                  />
-                  <button 
-                    type="button" 
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
+            <div className="flex items-center space-x-2 ml-1">
+              <Checkbox id="remember" className="rounded-md border-slate-300 data-[state=checked]:bg-primary" />
+              <Label htmlFor="remember" className="text-xs font-bold text-slate-600 cursor-pointer">Stay signed in for 30 days</Label>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="h-14 w-full rounded-2xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all" 
+              disabled={loading}
+            >
+              {loading ? "Authenticating..." : "Sign In to Dashboard"}
+            </Button>
+          </form>
+
+          <div className="mt-8 pt-8 border-t border-slate-50 text-center">
+            <div className="space-y-4">
+              <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Demo Credentials</p>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 border border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin</span>
+                  <span className="text-xs font-bold text-slate-600">admin@barakostore.com</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 border border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Staff</span>
+                  <span className="text-xs font-bold text-slate-600">staff@barakostore.com</span>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" className="rounded-md border-slate-300 data-[state=checked]:bg-primary" />
-                  <Label htmlFor="remember" className="text-sm font-medium text-slate-600 cursor-pointer">Remember Me</Label>
-                </div>
-                <button type="button" className="text-sm font-bold text-[#3338A0] hover:underline">Forgot Password?</button>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="h-12 w-full rounded-xl bg-[#3338A0] text-white font-bold text-base shadow-xl shadow-indigo-100 hover:bg-[#2a2e85] active:scale-[0.98] transition-all" 
-                disabled={loading}
-              >
-                {loading ? "Signing in..." : "Login"}
-              </Button>
-            </form>
-
-            <div className="text-center pt-2">
-              <p className="text-sm font-medium text-slate-500">
-                Not registered yet? <button className="text-[#3338A0] font-bold hover:underline inline-flex items-center">Create an account <ArrowUpRight className="ml-1 h-3 w-3" /></button>
-              </p>
             </div>
           </div>
-        </main>
+        </div>
 
-        <footer className="h-20 flex items-center justify-center border-t border-slate-50 text-[11px] text-slate-300 font-bold uppercase tracking-widest">
-          &copy; {new Date().getFullYear()} Barako Store Management System
-        </footer>
+        <p className="text-center text-sm font-medium text-slate-400">
+          Need technical support? <button className="text-primary font-bold hover:underline">Contact help desk</button>
+        </p>
       </div>
     </div>
   );
