@@ -5,14 +5,16 @@ import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Trash2, Sparkles, Loader2, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Sparkles, Loader2, Package, MoreVertical } from 'lucide-react';
 import { generateProductDescription } from '@/ai/flows/ai-product-description-assistant';
 import { toast } from '@/hooks/use-toast';
 import { Product } from '@/types';
 import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function ProductsPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useStore();
@@ -97,174 +99,194 @@ export default function ProductsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Products</h1>
-          <p className="text-muted-foreground">Manage your grocery inventory and product details.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Product Management</h1>
+          <p className="text-slate-500 font-medium">Manage your catalog, prices and stock levels.</p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="shadow-lg">
-          <Plus className="mr-2 h-4 w-4" /> Add Product
+        <Button onClick={() => handleOpenModal()} className="h-12 px-6 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+          <Plus className="mr-2 h-5 w-5" /> Add New Product
         </Button>
       </div>
 
-      <div className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm border">
+      <div className="flex items-center gap-4 rounded-2xl bg-white p-2 shadow-sm border border-slate-100">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
           <Input 
             placeholder="Search products by name or category..." 
-            className="pl-10 bg-secondary/30" 
+            className="pl-12 h-11 bg-transparent border-none focus-visible:ring-0 font-medium" 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <Card className="border-none shadow-sm card-shadow overflow-hidden rounded-3xl">
         <Table>
-          <TableHeader className="bg-secondary/50">
-            <TableRow>
-              <TableHead className="w-[80px]">Image</TableHead>
-              <TableHead>Product Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+          <TableHeader className="bg-slate-50/50">
+            <TableRow className="hover:bg-transparent border-slate-100">
+              <TableHead className="w-[100px] font-bold text-slate-500">Image</TableHead>
+              <TableHead className="font-bold text-slate-500">Product Name</TableHead>
+              <TableHead className="font-bold text-slate-500">Category</TableHead>
+              <TableHead className="font-bold text-slate-500">Price</TableHead>
+              <TableHead className="font-bold text-slate-500">Stock</TableHead>
+              <TableHead className="font-bold text-slate-500 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProducts.map((product) => (
-              <TableRow key={product.id} className="hover:bg-secondary/20 transition-colors">
+              <TableRow key={product.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
                 <TableCell>
-                  <div className="relative h-12 w-12 overflow-hidden rounded-lg border bg-muted">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
                     {product.image ? (
                       <Image 
                         src={product.image} 
                         alt={product.name} 
                         fill 
-                        className="object-cover" 
+                        className="object-cover transition-transform group-hover:scale-110" 
                         data-ai-hint="grocery product"
                       />
                     ) : (
-                      <Package className="h-6 w-6 text-muted-foreground m-auto" />
+                      <Package className="h-6 w-6 text-slate-200 m-auto" />
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="font-bold text-primary">{product.name}</TableCell>
+                <TableCell className="font-bold text-slate-900">{product.name}</TableCell>
                 <TableCell>
-                   <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                   <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold">
                     {product.category}
-                  </span>
+                  </Badge>
                 </TableCell>
-                <TableCell className="font-medium">${product.price.toFixed(2)}</TableCell>
+                <TableCell className="font-black text-primary text-lg">${product.price.toFixed(2)}</TableCell>
                 <TableCell>
-                  <span className={product.stockQuantity <= 10 ? "text-orange-600 font-bold" : ""}>
-                    {product.stockQuantity}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{product.unit}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(product)} className="hover:bg-primary/10 text-primary">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteProduct(product.id)} className="hover:bg-destructive/10 text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex flex-col gap-1.5">
+                    <span className={`text-sm font-bold ${product.stockQuantity <= 10 ? "text-primary" : "text-slate-700"}`}>
+                      {product.stockQuantity} {product.unit}
+                    </span>
+                    <div className="h-1.5 w-16 bg-slate-100 rounded-full overflow-hidden">
+                       <div 
+                         className={`h-full transition-all ${product.stockQuantity <= 10 ? "bg-accent" : "bg-primary"}`} 
+                         style={{ width: `${Math.min(100, (product.stockQuantity / 50) * 100)}%` }}
+                       />
+                    </div>
                   </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100">
+                        <MoreVertical className="h-5 w-5 text-slate-400" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl border-none shadow-xl p-2">
+                      <DropdownMenuItem onClick={() => handleOpenModal(product)} className="rounded-lg gap-2 cursor-pointer p-3 font-bold text-primary focus:bg-primary/5 focus:text-primary">
+                        <Edit className="h-4 w-4" /> Edit Product
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => deleteProduct(product.id)} className="rounded-lg gap-2 cursor-pointer p-3 font-bold text-destructive focus:bg-destructive/5 focus:text-destructive">
+                        <Trash2 className="h-4 w-4" /> Delete Product
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
             {filteredProducts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                  No products found.
+                <TableCell colSpan={6} className="h-40 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center opacity-40">
+                    <Package className="h-12 w-12 mb-2" />
+                    <p className="font-bold">No products found</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-            <DialogDescription>
-              Enter the product details below. Use the AI tool to generate catchy descriptions.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Name</Label>
-                <Input 
-                  id="name" 
-                  className="col-span-3" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                />
+        <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl rounded-3xl">
+          <div className="bg-primary p-8 text-white">
+            <h3 className="text-2xl font-black">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
+            <p className="text-white/70 font-medium">Fill in the information to manage your catalog.</p>
+          </div>
+          <form onSubmit={handleSubmit} className="p-8 bg-white space-y-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-slate-400">Product Name</Label>
+                  <Input 
+                    id="name" 
+                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-xs font-black uppercase tracking-widest text-slate-400">Category</Label>
+                  <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
+                    <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold">
+                      <SelectValue placeholder="Select Category" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-none shadow-xl">
+                      <SelectItem value="Fruits">Fruits</SelectItem>
+                      <SelectItem value="Vegetables">Vegetables</SelectItem>
+                      <SelectItem value="Dairy">Dairy</SelectItem>
+                      <SelectItem value="Bakery">Bakery</SelectItem>
+                      <SelectItem value="Meat">Meat</SelectItem>
+                      <SelectItem value="General">General</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">Category</Label>
-                <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Fruits">Fruits</SelectItem>
-                    <SelectItem value="Vegetables">Vegetables</SelectItem>
-                    <SelectItem value="Dairy">Dairy</SelectItem>
-                    <SelectItem value="Bakery">Bakery</SelectItem>
-                    <SelectItem value="Meat">Meat</SelectItem>
-                    <SelectItem value="General">General</SelectItem>
-                  </SelectContent>
-                </Select>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-xs font-black uppercase tracking-widest text-slate-400">Price ($)</Label>
+                  <Input 
+                    id="price" 
+                    type="number" 
+                    step="0.01" 
+                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stock" className="text-xs font-black uppercase tracking-widest text-slate-400">Initial Stock</Label>
+                  <Input 
+                    id="stock" 
+                    type="number" 
+                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    value={formData.stockQuantity}
+                    onChange={(e) => setFormData({...formData, stockQuantity: parseInt(e.target.value)})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unit" className="text-xs font-black uppercase tracking-widest text-slate-400">Unit</Label>
+                  <Select value={formData.unit} onValueChange={(val) => setFormData({...formData, unit: val})}>
+                    <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold">
+                      <SelectValue placeholder="Unit" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-none shadow-xl">
+                      <SelectItem value="kg">Kilogram (kg)</SelectItem>
+                      <SelectItem value="liter">Liter (l)</SelectItem>
+                      <SelectItem value="piece">Piece (pc)</SelectItem>
+                      <SelectItem value="box">Box</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">Price ($)</Label>
-                <Input 
-                  id="price" 
-                  type="number" 
-                  step="0.01" 
-                  className="col-span-3" 
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="stock" className="text-right">Stock</Label>
-                <Input 
-                  id="stock" 
-                  type="number" 
-                  className="col-span-3" 
-                  value={formData.stockQuantity}
-                  onChange={(e) => setFormData({...formData, stockQuantity: parseInt(e.target.value)})}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="unit" className="text-right">Unit</Label>
-                <Select value={formData.unit} onValueChange={(val) => setFormData({...formData, unit: val})}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kg">Kilogram (kg)</SelectItem>
-                    <SelectItem value="liter">Liter (l)</SelectItem>
-                    <SelectItem value="piece">Piece (pc)</SelectItem>
-                    <SelectItem value="box">Box</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
+
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-xs font-black uppercase tracking-widest text-slate-400">Description</Label>
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm" 
-                    className="h-7 text-[10px] gap-1 border-primary text-primary hover:bg-primary hover:text-white"
+                    className="h-8 text-xs font-black gap-2 border-primary/20 text-primary rounded-lg hover:bg-primary/5"
                     onClick={handleAIDescription}
                     disabled={isGenerating}
                   >
@@ -274,17 +296,19 @@ export default function ProductsPage() {
                 </div>
                 <textarea 
                   id="description" 
-                  className="w-full min-h-[100px] rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full min-h-[120px] rounded-2xl border-none bg-slate-50 px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Describe your product here..."
+                  placeholder="Tell customers more about this product..."
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit">{editingProduct ? 'Save Changes' : 'Add Product'}</Button>
-            </DialogFooter>
+            <div className="flex gap-4 pt-4">
+              <Button type="button" variant="ghost" className="flex-1 h-12 rounded-xl font-bold text-slate-500" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-1 h-12 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20">
+                {editingProduct ? 'Save Changes' : 'Create Product'}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
