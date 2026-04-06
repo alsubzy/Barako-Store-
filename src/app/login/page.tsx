@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -59,9 +58,14 @@ export default function LoginPage() {
 
         {/* Center Login Content */}
         <main className="flex-1 flex flex-col items-center justify-center py-12 px-6">
-          <div className="w-full max-w-[420px] space-y-8">
-            <div className="text-center md:text-left mb-4">
-              <h1 className="text-[40px] font-bold text-slate-900 leading-tight">Login</h1>
+          <div className="w-full max-w-[420px] space-y-10">
+            {/* Branded Title Section */}
+            <div className="text-center mb-2">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight">
+                <span className="text-[#3338A0]">Barako</span>
+                <span className="ml-2 text-[#FCC61D]">Store</span>
+              </h1>
+              <p className="text-slate-500 font-medium mt-4">Management & POS System</p>
             </div>
 
             {/* Login Form */}
