@@ -5,6 +5,7 @@ import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -213,9 +214,9 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-slate-400">Product Name</Label>
-                  <Input 
+                  <input 
                     id="name" 
-                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    className="flex h-12 w-full bg-slate-50 border-none rounded-xl font-bold px-4 focus:ring-2 focus:ring-primary/20 outline-none" 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     required
@@ -242,11 +243,11 @@ export default function ProductsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-xs font-black uppercase tracking-widest text-slate-400">Price ($)</Label>
-                  <Input 
+                  <input 
                     id="price" 
                     type="number" 
                     step="0.01" 
-                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    className="flex h-12 w-full bg-slate-50 border-none rounded-xl font-bold px-4 focus:ring-2 focus:ring-primary/20 outline-none" 
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})}
                     required
@@ -254,10 +255,10 @@ export default function ProductsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="stock" className="text-xs font-black uppercase tracking-widest text-slate-400">Initial Stock</Label>
-                  <Input 
+                  <input 
                     id="stock" 
                     type="number" 
-                    className="h-12 bg-slate-50 border-none rounded-xl font-bold" 
+                    className="flex h-12 w-full bg-slate-50 border-none rounded-xl font-bold px-4 focus:ring-2 focus:ring-primary/20 outline-none" 
                     value={formData.stockQuantity}
                     onChange={(e) => setFormData({...formData, stockQuantity: parseInt(e.target.value)})}
                     required
