@@ -104,7 +104,6 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
 
-        // Update product stock
         const updatedProducts = products.map((p) => {
           const cartItem = cart.find((item) => item.id === p.id);
           if (cartItem) {
@@ -129,7 +128,7 @@ export const useStore = create<AppState>()(
       })),
     }),
     {
-      name: 'marketflow-pro-storage',
+      name: 'barako-store-storage',
     }
   )
 );

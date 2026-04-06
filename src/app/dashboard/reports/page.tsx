@@ -45,7 +45,7 @@ export default function ReportsPage() {
       }));
       
       const res = await aiDataInsightGenerator({
-        totalSales: totalSales || 154200, // Using real data or mock fallback
+        totalSales: totalSales || 154200, 
         totalOrders: orders.length || 1240,
         lowStockItems: lowStockItems,
         topSellingProducts: products.slice(0, 3).map(p => ({ productName: p.name, totalRevenue: p.price * 100 })),
@@ -132,7 +132,7 @@ export default function ReportsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-accent" />
-            MarketFlow AI Insights
+            Barako Store AI Insights
           </CardTitle>
           <CardDescription className="text-primary-foreground/80">
             Let AI analyze your store data to provide strategic recommendations.

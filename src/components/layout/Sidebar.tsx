@@ -42,7 +42,7 @@ export default function Sidebar() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg">
               <ShoppingCart className="h-6 w-6" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-primary">MarketFlow<span className="text-accent">Pro</span></span>
+            <span className="text-xl font-bold tracking-tight text-primary">Barako <span className="text-accent">Store</span></span>
           </Link>
         </div>
 

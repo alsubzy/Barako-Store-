@@ -31,7 +31,7 @@ export default function LoginPage() {
       setLoading(false);
       toast({
         title: "Login Successful",
-        description: `Welcome back to MarketFlow Pro!`,
+        description: `Welcome back to Barako Store!`,
       });
       router.push('/dashboard');
     }, 1000);
@@ -44,7 +44,7 @@ export default function LoginPage() {
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary text-white shadow-2xl shadow-primary/30 ring-8 ring-primary/10">
             <ShoppingCart className="h-10 w-10" />
           </div>
-          <h1 className="text-4xl font-black tracking-tight text-primary">MarketFlow<span className="text-accent">Pro</span></h1>
+          <h1 className="text-4xl font-black tracking-tight text-primary">Barako <span className="text-accent">Store</span></h1>
           <p className="mt-4 text-slate-500 font-bold max-w-xs">Elevate your grocery business with professional management.</p>
         </div>
 

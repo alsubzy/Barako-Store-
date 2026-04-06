@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'MarketFlow Pro | Grocery Store Management',
+  title: 'Barako Store | Grocery Store Management',
   description: 'Professional Grocery Store and Inventory Management System',
 };
 
