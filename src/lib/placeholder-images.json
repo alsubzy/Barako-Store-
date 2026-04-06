@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "fresh-apples",
+      "description": "Crisp red apples in a basket",
+      "imageUrl": "https://picsum.photos/seed/apple/600/400",
+      "imageHint": "red apples"
+    },
+    {
+      "id": "organic-milk",
+      "description": "Fresh organic milk in a glass bottle",
+      "imageUrl": "https://picsum.photos/seed/milk/600/400",
+      "imageHint": "milk bottle"
+    },
+    {
+      "id": "whole-grain-bread",
+      "description": "Sourdough whole grain bread",
+      "imageUrl": "https://picsum.photos/seed/bread/600/400",
+      "imageHint": "bread loaf"
+    },
+    {
+      "id": "fresh-veggies",
+      "description": "Assorted fresh vegetables",
+      "imageUrl": "https://picsum.photos/seed/vegetables/600/400",
+      "imageHint": "fresh vegetables"
+    },
+    {
+      "id": "organic-eggs",
+      "description": "Farm fresh eggs in a carton",
+      "imageUrl": "https://picsum.photos/seed/eggs/600/400",
+      "imageHint": "eggs carton"
+    }
+  ]
 }
