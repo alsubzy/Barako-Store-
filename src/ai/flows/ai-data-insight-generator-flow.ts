@@ -52,7 +52,7 @@ const insightPrompt = ai.definePrompt({
   prompt: `You are an AI business analyst for a grocery store. Your goal is to provide a concise and actionable summary of the store's performance based on the provided dashboard data. Highlight key trends, top performers, and critical concerns such as low stock.
 
 **Current Dashboard Snapshot:**
-- Total Sales: ${{{totalSales}}}
+- Total Sales: \${{{totalSales}}}
 - Total Orders: {{{totalOrders}}}
 
 **Low Stock Alerts:**
@@ -67,7 +67,7 @@ No immediate low stock concerns.
 **Top Selling Products (by Revenue):**
 {{#if topSellingProducts}}
 {{#each topSellingProducts}}
-- {{productName}}: ${{{totalRevenue}}}
+- {{productName}}: \${{{totalRevenue}}}
 {{/each}}
 {{else}}
 No top selling product data available.
@@ -76,7 +76,7 @@ No top selling product data available.
 **Monthly Revenue Trends:**
 {{#if monthlyRevenueTrends}}
 {{#each monthlyRevenueTrends}}
-- {{month}}: ${{{revenue}}}
+- {{month}}: \${{{revenue}}}
 {{/each}}
 {{else}}
 No monthly revenue trend data available.
