@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -13,7 +14,8 @@ import {
   BarChart3, 
   LogOut,
   Boxes,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -29,13 +31,14 @@ export default function Sidebar() {
     { name: 'Inventory', href: '/dashboard/inventory', icon: Boxes, roles: ['admin'], badge: lowStockCount > 0 ? lowStockCount : null },
     { name: 'Orders', href: '/dashboard/orders', icon: History, roles: ['admin', 'staff'] },
     { name: 'Customers', href: '/dashboard/customers', icon: Users, roles: ['admin'] },
+    { name: 'Identity', href: '/dashboard/users', icon: ShieldCheck, roles: ['admin'] },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['admin'] },
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || 'staff'));
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white dark:bg-slate-950 dark:border-slate-800">
       <div className="flex h-full flex-col px-4 py-6">
         <div className="mb-10 px-2">
           <Link href="/dashboard" className="flex items-center gap-3">
@@ -57,7 +60,7 @@ export default function Sidebar() {
                   "group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                   isActive 
                     ? "bg-primary text-white shadow-md shadow-primary/20" 
-                    : "text-slate-500 hover:bg-slate-50 hover:text-primary"
+                    : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-primary"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -81,12 +84,12 @@ export default function Sidebar() {
         </nav>
 
         <div className="mt-auto pt-6 space-y-4">
-          <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 border border-slate-100">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-bold ring-2 ring-white shadow-sm">
+          <div className="flex items-center gap-3 rounded-2xl bg-slate-50 dark:bg-slate-900 p-3 border border-slate-100 dark:border-slate-800">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-bold ring-2 ring-white dark:ring-slate-950 shadow-sm">
               {user?.name?.[0].toUpperCase() || 'U'}
             </div>
             <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-bold text-slate-900">{user?.name || 'User'}</p>
+              <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.name || 'User'}</p>
               <p className="truncate text-[10px] text-slate-500 uppercase tracking-wider font-semibold">{user?.role || 'Staff'}</p>
             </div>
           </div>
