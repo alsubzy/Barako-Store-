@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -9,17 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Plus, Search, Edit, Trash2, Filter, Loader2, ShoppingBag, 
-  MoreVertical, ChevronLeft, ChevronRight, CheckCircle2, 
-  Clock, AlertCircle, XCircle, FileText, Download
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, Search, Edit2, Trash2, Loader2, Download, ShoppingBag, Eye } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { OrderFormModal } from '@/components/orders/OrderFormModal';
+import { OrderDetailModal } from '@/components/orders/OrderDetailModal';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 10;
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,9 +24,10 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -51,18 +49,18 @@ export default function OrdersPage() {
     try {
       if (editingOrder) {
         await ordersAPI.update(editingOrder.id, data);
-        toast({ title: "Success", description: "Order updated successfully" });
+        toast({ title: "Success", description: "Order updated successfully." });
       } else {
         const res = await ordersAPI.create(data);
         if (!res.success) {
            toast({ title: "Stock Error", description: res.message, variant: "destructive" });
            return;
         }
-        toast({ title: "Success", description: "Order placed successfully" });
+        toast({ title: "Success", description: "Order placed successfully." });
       }
       fetchOrders();
     } catch (err) {
-      toast({ title: "Error", description: "Operation failed", variant: "destructive" });
+      toast({ title: "Error", description: "Operation failed.", variant: "destructive" });
     }
   };
 
@@ -70,29 +68,17 @@ export default function OrdersPage() {
     if (!confirm('Are you sure you want to delete this order?')) return;
     try {
       await ordersAPI.delete(id);
-      toast({ title: "Deleted", description: "Order removed" });
+      toast({ title: "Success", description: "Order deleted successfully." });
       fetchOrders();
     } catch (err) {
-      toast({ title: "Error", description: "Delete failed", variant: "destructive" });
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} orders?`)) return;
-    try {
-      await ordersAPI.bulkDelete(selectedIds);
-      toast({ title: "Success", description: `${selectedIds.length} items removed` });
-      setSelectedIds([]);
-      fetchOrders();
-    } catch (err) {
-      toast({ title: "Error", description: "Bulk delete failed", variant: "destructive" });
+      toast({ title: "Error", description: "Deletion failed.", variant: "destructive" });
     }
   };
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      const matchesSearch = o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           o.id.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || o.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -105,204 +91,221 @@ export default function OrdersPage() {
 
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
 
-  const getStatusConfig = (status: OrderStatus) => {
-    switch (status) {
-      case 'Completed': return { color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 };
-      case 'Processing': return { color: 'bg-blue-100 text-blue-700', icon: Clock };
-      case 'Pending': return { color: 'bg-amber-100 text-amber-700', icon: AlertCircle };
-      case 'Cancelled': return { color: 'bg-rose-100 text-rose-700', icon: XCircle };
-      default: return { color: 'bg-slate-100 text-slate-700', icon: FileText };
-    }
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  if (loading && orders.length === 0) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const totalRevenue = useMemo(() => {
+    return orders.reduce((acc, o) => acc + o.totalAmount, 0);
+  }, [orders]);
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-6 pb-12">
+      {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-primary">Orders</h1>
-          <p className="text-slate-500 font-medium">Manage Barako Store sales transactions and fulfillment.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Orders</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Track and manage customer orders</p>
         </div>
+        
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="h-12 px-6 rounded-xl font-bold border-slate-200">
+          <Button variant="outline" className="h-10 px-4 rounded-xl font-medium border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50">
             <Download className="mr-2 h-4 w-4" /> Export
           </Button>
-          {selectedIds.length > 0 && (
-            <Button onClick={handleBulkDelete} variant="destructive" className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-destructive/20">
-              <Trash2 className="mr-2 h-4 w-4" /> Bulk Delete ({selectedIds.length})
-            </Button>
-          )}
-          <Button onClick={() => { setEditingOrder(null); setIsFormOpen(true); }} className="h-12 px-6 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105">
-            <Plus className="mr-2 h-5 w-5" /> Create Order
+          <Button 
+            onClick={() => { setEditingOrder(null); setIsFormOpen(true); }} 
+            className="h-10 px-5 rounded-full bg-primary text-white shadow-sm hover:shadow-md transition-all hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Create Order
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Card className="flex-1 flex items-center px-4 h-14 border-none shadow-sm rounded-2xl overflow-hidden bg-white">
-            <Search className="h-5 w-5 text-slate-400 mr-3" />
-            <Input 
-              placeholder="Search by Order ID or Customer..." 
-              className="border-none bg-transparent focus-visible:ring-0 font-medium text-slate-900"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </Card>
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-            {['All', 'Pending', 'Processing', 'Completed', 'Cancelled'].map(s => (
-              <Button 
-                key={s}
-                variant={statusFilter === s ? 'default' : 'outline'}
-                onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
-                className={`h-14 rounded-2xl px-6 font-bold transition-all whitespace-nowrap ${statusFilter === s ? 'bg-primary text-white' : 'border-slate-200 text-slate-500 bg-white'}`}
-              >
-                {s}
-              </Button>
-            ))}
+      {/* 2. SUMMARY CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-sm bg-white dark:bg-card hover:shadow-md transition-shadow">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Orders</p>
+          <div className="text-3xl font-semibold mt-2 text-slate-900 dark:text-white">
+            {loading ? <Skeleton className="h-9 w-16" /> : orders.length}
           </div>
-        </div>
+          <p className="text-xs text-slate-400 mt-1">Order records</p>
+        </Card>
+        <Card className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-sm bg-white dark:bg-card hover:shadow-md transition-shadow">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Revenue</p>
+          <div className="text-3xl font-semibold mt-2 text-slate-900 dark:text-white">
+            {loading ? <Skeleton className="h-9 w-24" /> : `$${totalRevenue.toLocaleString()}`}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Gross income</p>
+        </Card>
+      </div>
 
-        <Card className="border-none shadow-sm rounded-[32px] overflow-hidden bg-white">
+      {/* 3. FILTER BAR */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="relative w-full md:flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input 
+            placeholder="Search orders..." 
+            className="pl-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-sm bg-white dark:bg-card w-full"
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+          />
+        </div>
+        
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+            <SelectItem value="All">All Statuses</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Processing">Processing</SelectItem>
+            <SelectItem value="Completed">Completed</SelectItem>
+            <SelectItem value="Cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* 4. DATA TABLE */}
+      <Card className="border border-slate-100 dark:border-slate-800/50 shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-card">
+        <div className="overflow-x-auto min-h-[400px]">
           <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-none hover:bg-transparent">
-                <TableHead className="w-12 px-6">
-                  <Checkbox 
-                    checked={selectedIds.length > 0 && selectedIds.length === paginatedOrders.length}
-                    onCheckedChange={() => setSelectedIds(selectedIds.length === paginatedOrders.length ? [] : paginatedOrders.map(o => o.id))}
-                    className="border-slate-300 rounded-md"
-                  />
-                </TableHead>
-                <TableHead className="font-bold text-slate-500 py-6">Order ID</TableHead>
-                <TableHead className="font-bold text-slate-500">Customer</TableHead>
-                <TableHead className="font-bold text-slate-500">Items</TableHead>
-                <TableHead className="font-bold text-slate-500">Total</TableHead>
-                <TableHead className="font-bold text-slate-500">Status</TableHead>
-                <TableHead className="font-bold text-slate-500 text-right px-6">Actions</TableHead>
+            <TableHeader>
+              <TableRow className="border-slate-100 dark:border-slate-800/50 hover:bg-transparent">
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 pl-6 text-sm">Order ID</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Customer</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Date</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Status</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Total Amount</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-right pr-6 text-sm">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedOrders.map((o) => {
-                const status = getStatusConfig(o.status);
-                const StatusIcon = status.icon;
-                return (
-                  <TableRow key={o.id} className={`border-b border-slate-50 transition-colors group ${selectedIds.includes(o.id) ? 'bg-primary/5' : 'hover:bg-slate-50/50'}`}>
-                    <TableCell className="px-6">
-                      <Checkbox 
-                        checked={selectedIds.includes(o.id)}
-                        onCheckedChange={() => toggleSelect(o.id)}
-                        className="border-slate-300 rounded-md"
-                      />
+              {loading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <TableRow key={idx} className="border-slate-50 dark:border-slate-800/50">
+                    <TableCell className="pl-6 py-4"><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell className="pr-6 text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
+              ) : paginatedOrders.length > 0 ? (
+                paginatedOrders.map((o) => (
+                  <TableRow 
+                    key={o.id} 
+                    className="border-slate-50 dark:border-slate-800/50 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/20 group cursor-pointer"
+                    onClick={() => { setViewingOrder(o); setIsDetailOpen(true); }}
+                  >
+                    <TableCell className="py-4 pl-6 font-mono text-xs font-semibold text-primary">
+                      #{o.id}
                     </TableCell>
-                    <TableCell className="font-black text-primary font-mono text-xs">{o.id}</TableCell>
-                    <TableCell>
-                       <p className="font-bold text-slate-900 leading-tight">{o.customerName}</p>
-                       <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">{new Date(o.orderDate).toLocaleDateString()}</p>
+                    <TableCell className="py-4 font-medium text-slate-900 dark:text-white">
+                      {o.customerName}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm font-black text-slate-700">{o.items.length} Products</p>
-                        <p className="text-[10px] text-slate-400 truncate max-w-[150px]">
-                          {o.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
-                        </p>
-                      </div>
+                    <TableCell className="py-4 text-slate-500 dark:text-slate-400">
+                      {new Date(o.orderDate).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="font-black text-primary text-lg">${o.totalAmount.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${status.color}`}>
-                        <StatusIcon className="h-3 w-3" />
+                    <TableCell className="py-4">
+                      <Badge className={cn(
+                        "rounded-full px-2.5 py-0.5 font-medium text-xs border-none shadow-none",
+                        o.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                        o.status === 'Pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                        o.status === 'Processing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                        'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
+                      )}>
                         {o.status}
-                      </div>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="text-right px-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm">
-                            <MoreVertical className="h-5 w-5 text-slate-400" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 min-w-[160px]">
-                          <DropdownMenuItem onClick={() => { setEditingOrder(o); setIsFormOpen(true); }} className="rounded-xl gap-2 p-3 font-bold text-primary focus:bg-primary/5 focus:text-primary cursor-pointer">
-                            <Edit className="h-4 w-4" /> Edit Order
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(o.id)} className="rounded-xl gap-2 p-3 font-bold text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer">
-                            <Trash2 className="h-4 w-4" /> Delete Order
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell className="py-4 font-semibold text-slate-900 dark:text-white">
+                      ${o.totalAmount.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="py-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg"
+                          onClick={() => { setViewingOrder(o); setIsDetailOpen(true); }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg"
+                          onClick={() => { setEditingOrder(o); setIsFormOpen(true); }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/5 rounded-lg"
+                          onClick={() => handleDelete(o.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                );
-              })}
-              {paginatedOrders.length === 0 && (
+                ))
+              ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center opacity-40">
-                      <ShoppingBag className="h-16 w-16 mb-4 text-slate-300" />
-                      <p className="text-xl font-black text-slate-900">No orders found</p>
-                      <p className="text-sm font-medium text-slate-500">Try adjusting your filters or search.</p>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <ShoppingBag className="h-10 w-10 text-slate-300 mb-4" />
+                      <p className="text-base font-medium text-slate-900 dark:text-white">No orders found</p>
+                      <p className="text-sm text-slate-500 mt-1 mb-4">Try adjusting your search or filter.</p>
+                      <Button variant="outline" className="rounded-xl" onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}>
+                        Clear Filters
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+        </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-8 py-6 bg-slate-50/50">
-              <p className="text-sm font-bold text-slate-400">
-                Showing <span className="text-primary">{paginatedOrders.length}</span> of <span className="text-primary">{filteredOrders.length}</span> results
-              </p>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" size="icon" className="rounded-xl border-slate-200 h-10 w-10" 
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <Button 
-                      key={i} 
-                      variant={currentPage === i + 1 ? 'default' : 'ghost'}
-                      className={`h-10 w-10 rounded-xl font-bold ${currentPage === i + 1 ? 'bg-primary' : 'text-slate-400'}`}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" size="icon" className="rounded-xl border-slate-200 h-10 w-10"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/50">
+            <p className="text-sm text-slate-500">
+              Showing <span className="font-medium text-slate-900 dark:text-white">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-slate-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</span> of <span className="font-medium text-slate-900 dark:text-white">{filteredOrders.length}</span> results
+            </p>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+              >
+                Next
+              </Button>
             </div>
-          )}
-        </Card>
-      </div>
+          </div>
+        )}
+      </Card>
 
       <OrderFormModal 
         isOpen={isFormOpen} 
         onClose={() => { setIsFormOpen(false); setEditingOrder(null); }} 
         onSubmit={handleCreateOrUpdate}
         initialData={editingOrder}
+      />
+
+      <OrderDetailModal 
+        isOpen={isDetailOpen} 
+        onClose={() => { setIsDetailOpen(false); setViewingOrder(null); }} 
+        order={viewingOrder}
       />
     </div>
   );

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Customer, CustomerStatus } from '@/types/customer';
-import { Loader2, User, Mail, Phone, MapPin, CheckCircle2, X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -59,108 +60,109 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[540px] rounded-[2.5rem] overflow-hidden p-0 border-none shadow-2xl dark:bg-slate-900 bg-white animate-in zoom-in duration-300">
-        <div className="bg-slate-50 dark:bg-slate-800/50 p-10 border-b border-slate-100 dark:border-slate-800 relative">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-               <User className="h-5 w-5" />
-            </div>
-            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Customer Registration</span>
-          </div>
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-slate-900 dark:text-white">
-              {initialData ? 'Update Profile' : 'Register Customer'}
+      <DialogContent className="sm:max-w-lg p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
+        
+        {/* Header Section */}
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <DialogHeader className="space-y-1.5 text-left">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              {initialData ? 'Edit Customer' : 'Add New Customer'}
             </DialogTitle>
-            <p className="text-sm font-medium text-slate-500 mt-2">Maintain accurate customer records to drive engagement and monitor lifetime value.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Enter the details of the customer
+            </p>
           </DialogHeader>
-          <button onClick={onClose} className="absolute top-8 right-8 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
-            <X className="h-6 w-6" />
+          <button 
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-10 space-y-10 bg-white dark:bg-slate-900">
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Customer Full Name</Label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-                <Input 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-14 bg-slate-50/50 dark:bg-slate-800 border-none rounded-2xl font-bold pl-12 focus-visible:ring-primary/20 placeholder:text-slate-300 transition-all"
-                  placeholder="e.g. Sebastian Varela"
-                  required
-                />
-              </div>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 pb-6 space-y-5">
+            
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Name</Label>
+              <Input 
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                placeholder="e.g. Ahmed Ali"
+                required
+              />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Work Email</Label>
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-                  <Input 
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="h-14 bg-slate-50/50 dark:bg-slate-800 border-none rounded-2xl font-bold pl-12 focus-visible:ring-primary/20 placeholder:text-slate-300 transition-all"
-                    placeholder="name@email.com"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Line</Label>
-                <div className="relative group">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-                  <Input 
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="h-14 bg-slate-50/50 dark:bg-slate-800 border-none rounded-2xl font-bold pl-12 focus-visible:ring-primary/20 placeholder:text-slate-300 transition-all"
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Email</Label>
+              <Input 
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                placeholder="example@email.com"
+                required
+              />
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mailing Address</Label>
-              <div className="relative group">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Phone</Label>
                 <Input 
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="h-14 bg-slate-50/50 dark:bg-slate-800 border-none rounded-2xl font-bold pl-12 focus-visible:ring-primary/20 placeholder:text-slate-300 transition-all"
-                  placeholder="Street, City, Country"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                  placeholder="+252..."
                 />
               </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Status</Label>
+                <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as CustomerStatus })}>
+                  <SelectTrigger className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm transition-all text-slate-900 dark:text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+                    <SelectItem value="Active" className="text-sm">Active</SelectItem>
+                    <SelectItem value="Inactive" className="text-sm">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Account Status</Label>
-              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as CustomerStatus })}>
-                <SelectTrigger className="h-14 bg-slate-50/50 dark:bg-slate-800 border-none rounded-2xl font-bold focus:ring-primary/20 transition-all">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl dark:bg-slate-800 bg-white p-2">
-                  <SelectItem value="Active" className="rounded-xl font-bold py-3 px-4 transition-colors focus:bg-primary/5 focus:text-primary cursor-pointer">Active Relationship</SelectItem>
-                  <SelectItem value="Inactive" className="rounded-xl font-bold py-3 px-4 transition-colors focus:bg-slate-100 cursor-pointer">On-Hold / Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Address</Label>
+              <Input 
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                placeholder="Customer address..."
+              />
             </div>
+
           </div>
           
-          <DialogFooter className="pt-6 gap-4 flex-col sm:flex-row">
-            <Button type="button" variant="ghost" onClick={onClose} className="h-14 flex-1 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Discard Changes</Button>
-            <Button type="submit" disabled={loading} className="h-14 flex-1 rounded-2xl bg-primary text-white shadow-2xl shadow-primary/30 font-black hover:scale-[1.02] active:scale-95 transition-all">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
-                <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  {initialData ? 'Save Changes' : 'Complete Registration'}
-                </span>
-              )}
+          {/* Footer Section */}
+          <div className="px-6 py-4 bg-white dark:bg-card border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 flex-col sm:flex-row">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              className="h-11 px-5 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-background text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+            >
+              Cancel
             </Button>
-          </DialogFooter>
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="h-11 px-6 rounded-md bg-primary hover:bg-primary/90 text-white font-medium shadow-sm transition-all w-full sm:w-auto"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {initialData ? 'Save Changes' : 'Add Customer'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

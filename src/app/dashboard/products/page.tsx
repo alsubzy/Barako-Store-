@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -9,18 +8,24 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
-  Plus, Search, Edit, Trash2, Filter, Loader2, Package, 
-  MoreVertical, ChevronLeft, ChevronRight, AlertCircle, 
-  CheckCircle2, TrendingDown
+  Plus, Search, Edit2, Trash2, Loader2, Package, 
+  Download, Filter, ArrowUpDown, MoreHorizontal
 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { ProductFormModal } from '@/components/products/ProductFormModal';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,7 +33,6 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -48,18 +52,18 @@ export default function ProductsPage() {
     }
   };
 
-  const handleCreateOrUpdate = async (data: Omit<Product, 'id' | 'createdAt'>) => {
+  const handleCreateOrUpdate = async (data: any) => {
     try {
       if (editingProduct) {
         await productsAPI.update(editingProduct.id, data);
-        toast({ title: "Success", description: "Product updated successfully" });
+        toast({ title: "Success", description: "Product updated successfully." });
       } else {
         await productsAPI.create(data);
-        toast({ title: "Success", description: "Product created successfully" });
+        toast({ title: "Success", description: "Product added to inventory." });
       }
       fetchProducts();
     } catch (err) {
-      toast({ title: "Error", description: "Operation failed", variant: "destructive" });
+      toast({ title: "Error", description: "Operation failed.", variant: "destructive" });
     }
   };
 
@@ -67,29 +71,17 @@ export default function ProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       await productsAPI.delete(id);
-      toast({ title: "Deleted", description: "Product removed from inventory" });
+      toast({ title: "Success", description: "Product removed successfully." });
       fetchProducts();
     } catch (err) {
-      toast({ title: "Error", description: "Delete failed", variant: "destructive" });
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} products?`)) return;
-    try {
-      await productsAPI.bulkDelete(selectedIds);
-      toast({ title: "Success", description: `${selectedIds.length} items removed` });
-      setSelectedIds([]);
-      fetchProducts();
-    } catch (err) {
-      toast({ title: "Error", description: "Bulk delete failed", variant: "destructive" });
+      toast({ title: "Error", description: "Deletion failed.", variant: "destructive" });
     }
   };
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           p.id.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === 'All' || p.category === categoryFilter;
       return matchesSearch && matchesCategory;
     });
@@ -102,222 +94,218 @@ export default function ProductsPage() {
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
-  const getStockStatus = (stock: number) => {
-    if (stock === 0) return { label: 'Out of Stock', color: 'bg-destructive text-white', icon: AlertCircle };
-    if (stock < 10) return { label: 'Low Stock', color: 'bg-accent text-primary', icon: TrendingDown };
-    return { label: 'In Stock', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 };
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === paginatedProducts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(paginatedProducts.map(p => p.id));
-    }
-  };
-
-  if (loading && products.length === 0) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const inventoryValue = useMemo(() => {
+    return products.reduce((acc, p) => acc + (p.price * p.stock), 0);
+  }, [products]);
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-6 pb-12">
+      {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-primary">Products</h1>
-          <p className="text-slate-500 font-medium">Manage Barako Store inventory and stock levels.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Products</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage inventory and stock levels</p>
         </div>
+        
         <div className="flex items-center gap-3">
-          {selectedIds.length > 0 && (
-            <Button onClick={handleBulkDelete} variant="destructive" className="h-12 px-6 rounded-xl font-bold shadow-lg shadow-destructive/20 transition-all hover:scale-105">
-              <Trash2 className="mr-2 h-4 w-4" /> Bulk Delete ({selectedIds.length})
-            </Button>
-          )}
-          <Button onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} className="h-12 px-6 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105">
-            <Plus className="mr-2 h-5 w-5" /> Add New Product
+          <Button variant="outline" className="h-10 px-4 rounded-xl font-medium border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50">
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+          <Button 
+            onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} 
+            className="h-10 px-5 rounded-full bg-primary text-white shadow-sm hover:shadow-md transition-all hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <div className="md:col-span-12 flex flex-col md:flex-row gap-4">
-          <Card className="flex-1 flex items-center px-4 h-14 border-none shadow-sm rounded-2xl overflow-hidden">
-            <Search className="h-5 w-5 text-slate-400 mr-3" />
-            <Input 
-              placeholder="Search products..." 
-              className="border-none bg-transparent focus-visible:ring-0 font-medium text-slate-900"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </Card>
-          <div className="flex gap-2">
-            {['All', 'Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat'].map(cat => (
-              <Button 
-                key={cat}
-                variant={categoryFilter === cat ? 'default' : 'outline'}
-                onClick={() => { setCategoryFilter(cat); setCurrentPage(1); }}
-                className={`h-14 rounded-2xl px-6 font-bold transition-all ${categoryFilter === cat ? 'bg-primary text-white' : 'border-slate-200 text-slate-500'}`}
-              >
-                {cat}
-              </Button>
-            ))}
+      {/* 2. SUMMARY CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-sm bg-white dark:bg-card hover:shadow-md transition-shadow">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Products</p>
+          <div className="text-3xl font-semibold mt-2 text-slate-900 dark:text-white">
+            {loading ? <Skeleton className="h-9 w-16" /> : products.length}
           </div>
-        </div>
+          <p className="text-xs text-slate-400 mt-1">Items in inventory</p>
+        </Card>
+        <Card className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-sm bg-white dark:bg-card hover:shadow-md transition-shadow">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Inventory Value</p>
+          <div className="text-3xl font-semibold mt-2 text-slate-900 dark:text-white">
+            {loading ? <Skeleton className="h-9 w-24" /> : `$${inventoryValue.toLocaleString()}`}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Asset valuation</p>
+        </Card>
+      </div>
 
-        <Card className="md:col-span-12 border-none shadow-sm rounded-[32px] overflow-hidden bg-white">
+      {/* 3. FILTER BAR */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="relative w-full md:flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input 
+            placeholder="Search products by name or SKU..." 
+            className="pl-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-sm bg-white dark:bg-card w-full"
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+          />
+        </div>
+        
+        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+            <SelectItem value="All">All Categories</SelectItem>
+            <SelectItem value="Fruits">Fruits</SelectItem>
+            <SelectItem value="Vegetables">Vegetables</SelectItem>
+            <SelectItem value="Dairy">Dairy</SelectItem>
+            <SelectItem value="Bakery">Bakery</SelectItem>
+            <SelectItem value="Meat">Meat</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* 4. DATA TABLE */}
+      <Card className="border border-slate-100 dark:border-slate-800/50 shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-card">
+        <div className="overflow-x-auto min-h-[400px]">
           <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-none hover:bg-transparent">
-                <TableHead className="w-12 px-6">
-                  <Checkbox 
-                    checked={selectedIds.length > 0 && selectedIds.length === paginatedProducts.length}
-                    onCheckedChange={toggleSelectAll}
-                    className="border-slate-300 rounded-md"
-                  />
-                </TableHead>
-                <TableHead className="font-bold text-slate-500 py-6">Product</TableHead>
-                <TableHead className="font-bold text-slate-500">Category</TableHead>
-                <TableHead className="font-bold text-slate-500">Price</TableHead>
-                <TableHead className="font-bold text-slate-500">Stock</TableHead>
-                <TableHead className="font-bold text-slate-500">Status</TableHead>
-                <TableHead className="font-bold text-slate-500 text-right px-6">Actions</TableHead>
+            <TableHeader>
+              <TableRow className="border-slate-100 dark:border-slate-800/50 hover:bg-transparent">
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 pl-6 text-sm">Product</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Category</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Price</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Stock</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Status</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-right pr-6 text-sm">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedProducts.map((p) => {
-                const status = getStockStatus(p.stock);
-                const StatusIcon = status.icon;
-                return (
-                  <TableRow key={p.id} className={`border-b border-slate-50 transition-colors group ${selectedIds.includes(p.id) ? 'bg-primary/5' : 'hover:bg-slate-50/50'}`}>
-                    <TableCell className="px-6">
-                      <Checkbox 
-                        checked={selectedIds.includes(p.id)}
-                        onCheckedChange={() => toggleSelect(p.id)}
-                        className="border-slate-300 rounded-md"
-                      />
+              {loading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <TableRow key={idx} className="border-slate-50 dark:border-slate-800/50">
+                    <TableCell className="pl-6 py-4">
+                       <div className="flex items-center gap-3">
+                          <Skeleton className="h-10 w-10 rounded-lg" />
+                          <div className="space-y-2">
+                             <Skeleton className="h-4 w-24" />
+                             <Skeleton className="h-3 w-16" />
+                          </div>
+                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-4 py-2">
-                        <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-sm">
-                          <Image 
-                            src={p.image || `https://picsum.photos/seed/${p.id}/100/100`} 
-                            alt={p.name} 
-                            fill 
-                            className="object-cover group-hover:scale-110 transition-transform" 
-                          />
-                        </div>
-                        <div>
-                          <p className="font-black text-slate-900 leading-tight">{p.name}</p>
-                          <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-widest">#{p.id}</p>
-                        </div>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                    <TableCell className="pr-6 text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
+              ) : paginatedProducts.length > 0 ? (
+                paginatedProducts.map((p) => (
+                  <TableRow 
+                    key={p.id} 
+                    className="border-slate-50 dark:border-slate-800/50 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/20 group"
+                  >
+                    <TableCell className="py-4 pl-6">
+                      <div className="flex items-center gap-3">
+                         <div className="h-10 w-10 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center font-bold text-primary dark:text-white group-hover:scale-105 transition-transform">
+                            {p.name[0]}
+                         </div>
+                         <div>
+                            <p className="font-medium text-slate-900 dark:text-white leading-none">{p.name}</p>
+                            <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">#{p.id.slice(0,8)}</p>
+                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-none font-bold rounded-lg px-3 py-1">
+                    <TableCell className="py-4">
+                      <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 font-medium text-[11px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-none shadow-none">
                         {p.category}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-black text-primary text-lg">${p.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1.5">
-                        <p className="text-sm font-black text-slate-700">{p.stock} <span className="text-[10px] text-slate-400 uppercase">{p.unit}</span></p>
-                        <div className="h-1.5 w-16 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all ${p.stock < 10 ? 'bg-accent' : 'bg-primary'}`} 
-                            style={{ width: `${Math.min(100, (p.stock / 50) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
+                    <TableCell className="py-4 font-semibold text-slate-900 dark:text-white">
+                      ${p.price.toFixed(2)}
                     </TableCell>
-                    <TableCell>
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${status.color}`}>
-                        <StatusIcon className="h-3 w-3" />
-                        {status.label}
-                      </div>
+                    <TableCell className="py-4 font-medium text-slate-500 dark:text-slate-400">
+                      {p.stock} <span className="text-[10px] uppercase font-bold text-slate-400">{p.unit}</span>
                     </TableCell>
-                    <TableCell className="text-right px-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm">
-                            <MoreVertical className="h-5 w-5 text-slate-400" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 min-w-[160px]">
-                          <DropdownMenuItem onClick={() => { setEditingProduct(p); setIsFormOpen(true); }} className="rounded-xl gap-2 p-3 font-bold text-primary focus:bg-primary/5 focus:text-primary cursor-pointer">
-                            <Edit className="h-4 w-4" /> Edit Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(p.id)} className="rounded-xl gap-2 p-3 font-bold text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer">
-                            <Trash2 className="h-4 w-4" /> Delete Item
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell className="py-4">
+                      <Badge className={cn(
+                        "rounded-full px-2.5 py-0.5 font-medium text-xs border-none shadow-none",
+                        p.stock > 10 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                        p.stock > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                        'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
+                      )}>
+                        {p.stock > 10 ? 'In Stock' : p.stock > 0 ? 'Low Stock' : 'Out of Stock'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4 pr-6 text-right">
+                      <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg"
+                          onClick={() => { setEditingProduct(p); setIsFormOpen(true); }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/5 rounded-lg"
+                          onClick={() => handleDelete(p.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                );
-              })}
-              {paginatedProducts.length === 0 && (
+                ))
+              ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center opacity-40">
-                      <Package className="h-16 w-16 mb-4 text-slate-300" />
-                      <p className="text-xl font-black text-slate-900">No items found</p>
-                      <p className="text-sm font-medium text-slate-500">Try adjusting your search or filters.</p>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Package className="h-10 w-10 text-slate-300 mb-4" />
+                      <p className="text-base font-medium text-slate-900 dark:text-white">No products found</p>
+                      <p className="text-sm text-slate-500 mt-1 mb-4">Try adjusting your search or filters.</p>
+                      <Button variant="outline" className="rounded-xl" onClick={() => { setSearchTerm(''); setCategoryFilter('All'); }}>
+                        Clear Filters
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+        </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-8 py-6 bg-slate-50/50">
-              <p className="text-sm font-bold text-slate-400">
-                Showing <span className="text-primary">{paginatedProducts.length}</span> of <span className="text-primary">{filteredProducts.length}</span> results
-              </p>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="rounded-xl border-slate-200 h-10 w-10" 
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <Button 
-                      key={i} 
-                      variant={currentPage === i + 1 ? 'default' : 'ghost'}
-                      className={`h-10 w-10 rounded-xl font-bold ${currentPage === i + 1 ? 'bg-primary' : 'text-slate-400'}`}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="rounded-xl border-slate-200 h-10 w-10"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/50">
+            <p className="text-sm text-slate-500">
+              Showing <span className="font-medium text-slate-900 dark:text-white">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-slate-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}</span> of <span className="font-medium text-slate-900 dark:text-white">{filteredProducts.length}</span> results
+            </p>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+              >
+                Next
+              </Button>
             </div>
-          )}
-        </Card>
-      </div>
+          </div>
+        )}
+      </Card>
 
       <ProductFormModal 
         isOpen={isFormOpen} 

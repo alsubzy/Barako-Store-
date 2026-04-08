@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Logo } from '@/components/shared/Logo';
 import { Eye, EyeOff, ArrowUpRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -42,12 +43,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6 font-body text-slate-900">
       <div className="w-full max-w-[440px] space-y-12">
         {/* Logo Section */}
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl font-black tracking-tight flex items-center justify-center">
-            <span className="text-primary">Barako</span>
-            <span className="ml-2 text-accent">Store</span>
-          </h1>
-          <p className="text-slate-500 font-medium text-lg">Management & POS System</p>
+        <div className="flex flex-col items-center text-center space-y-2">
+          <Logo size="xl" clickable={false} />
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">Enterprise Management Console</p>
         </div>
 
         {/* Form Section */}

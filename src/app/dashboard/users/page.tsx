@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -9,32 +8,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Search, UserPlus, Mail, MoreVertical, 
-  Loader2, Trash2, Edit, Shield, ChevronLeft, ChevronRight, Filter,
-  Clock, CheckCircle2, AlertCircle, ShieldCheck
-} from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Search, Loader2, Trash2, Edit2, Download } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { UserFormModal } from '@/components/users/UserFormModal';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Plus } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 10;
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -48,7 +38,7 @@ export default function UsersPage() {
       const res = await usersAPI.getAll();
       if (res.success) setUsers(res.data || []);
     } catch (err) {
-      toast({ title: "Sync Error", description: "Failed to load user management directory", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load users", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -58,36 +48,25 @@ export default function UsersPage() {
     try {
       if (editingUser) {
         await usersAPI.update(editingUser.id, data);
-        toast({ title: "Updated", description: "User account saved successfully." });
+        toast({ title: "Success", description: "User updated successfully." });
       } else {
         await usersAPI.create(data);
-        toast({ title: "Created", description: "User provisioned successfully." });
+        toast({ title: "Success", description: "User added successfully." });
       }
       fetchUsers();
     } catch (err) {
-      toast({ title: "Operation Failed", description: "Could not authorize changes.", variant: "destructive" });
+      toast({ title: "Error", description: "Operation failed.", variant: "destructive" });
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
     try {
       await usersAPI.delete(id);
-      toast({ title: "Deauthorized", description: "User removed from system access." });
+      toast({ title: "Success", description: "User deleted successfully." });
       fetchUsers();
     } catch (err) {
-      toast({ title: "Error", description: "Deauthorization failed.", variant: "destructive" });
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    try {
-      await usersAPI.bulkDelete(selectedIds);
-      toast({ title: "Bulk Action Complete", description: `${selectedIds.length} users removed from system.` });
-      setSelectedIds([]);
-      fetchUsers();
-    } catch (err) {
-      toast({ title: "Error", description: "Bulk deauthorization failed.", variant: "destructive" });
+      toast({ title: "Error", description: "Deletion failed.", variant: "destructive" });
     }
   };
 
@@ -96,9 +75,10 @@ export default function UsersPage() {
       const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            u.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === 'All' || u.role === roleFilter;
-      return matchesSearch && matchesRole;
+      const matchesStatus = statusFilter === 'All' || u.status === statusFilter;
+      return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [users, searchTerm, roleFilter]);
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   const paginatedUsers = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -107,186 +87,169 @@ export default function UsersPage() {
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  const getRoleBadge = (role: UserRole) => {
-    switch(role) {
-      case 'Admin': return 'bg-primary text-white';
-      case 'Manager': return 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-      default: return 'bg-slate-100 dark:bg-slate-800 text-slate-500';
-    }
-  };
-
-  if (loading && users.length === 0) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-sm font-medium text-slate-400">Syncing Identity Directory...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8 pb-12">
-      {/* SaaS Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-primary/70 font-bold uppercase tracking-widest text-[10px]">
-            <ShieldCheck className="h-3 w-3" />
-            <span>IAM System</span>
-          </div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Identity Hub</h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium max-w-lg">Manage organizational access, roles, and security policies for your Barako Store platform.</p>
+    <div className="space-y-6 pb-12">
+      {/* 1. HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Users</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage system users and roles</p>
         </div>
         
         <div className="flex items-center gap-3">
-          {selectedIds.length > 0 && (
-            <Button onClick={handleBulkDelete} variant="destructive" className="h-11 px-6 rounded-xl font-bold shadow-lg shadow-destructive/10 animate-in fade-in slide-in-from-right-4">
-              <Trash2 className="mr-2 h-4 w-4" /> Deauthorize ({selectedIds.length})
-            </Button>
-          )}
-          <Button onClick={() => { setEditingUser(null); setIsFormOpen(true); }} className="h-11 px-6 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
-            <UserPlus className="mr-2 h-4 w-4" /> Provision Account
+          <Button variant="outline" className="h-10 px-4 rounded-xl font-medium border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50">
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+          <Button 
+            onClick={() => { setEditingUser(null); setIsFormOpen(true); }} 
+            className="h-10 px-5 rounded-full bg-primary text-white shadow-sm hover:shadow-md transition-all hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add User
           </Button>
         </div>
       </div>
 
-      {/* Modern Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center">
-        <Card className="flex-1 flex items-center px-4 h-12 border-none shadow-sm rounded-xl bg-white dark:bg-slate-900 w-full group focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-          <Search className="h-4 w-4 text-slate-400 mr-3 group-focus-within:text-primary transition-colors" />
-          <Input 
-            placeholder="Search by name or email identifier..." 
-            className="border-none bg-transparent focus-visible:ring-0 font-medium text-slate-900 dark:text-white placeholder:text-slate-400 h-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {/* 2. SUMMARY CARD */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-sm bg-white dark:bg-card hover:shadow-md transition-shadow">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Users</p>
+          <div className="text-3xl font-semibold mt-2 text-slate-900 dark:text-white">
+            {loading ? <Skeleton className="h-9 w-16" /> : users.length}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Active accounts</p>
         </Card>
+      </div>
+
+      {/* 3. FILTER BAR */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="relative w-full md:flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input 
+            placeholder="Search users..." 
+            className="pl-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-sm bg-white dark:bg-card w-full"
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+          />
+        </div>
         
-        <div className="flex items-center gap-2 bg-slate-100/50 dark:bg-slate-900 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar border border-slate-200/50 dark:border-slate-800">
-          {['All', 'Admin', 'Manager', 'Staff'].map(r => (
-            <button 
-              key={r}
-              onClick={() => { setRoleFilter(r); setCurrentPage(1); }}
-              className={cn(
-                "h-10 px-6 rounded-lg font-bold text-xs transition-all whitespace-nowrap",
-                roleFilter === r 
-                  ? "bg-white dark:bg-slate-800 text-primary dark:text-white shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400"
-              )}
-            >
-              {r}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-full sm:w-[160px] h-10 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+              <SelectItem value="All">All Roles</SelectItem>
+              <SelectItem value="Admin">Admin</SelectItem>
+              <SelectItem value="Manager">Manager</SelectItem>
+              <SelectItem value="Staff">Staff</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-full sm:w-[160px] h-10 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+              <SelectItem value="All">All Statuses</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* SaaS Table Card */}
-      <Card className="border-none shadow-sm card-shadow rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900">
-        <div className="overflow-x-auto">
+      {/* 4. DATA TABLE */}
+      <Card className="border border-slate-100 dark:border-slate-800/50 shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-card">
+        <div className="overflow-x-auto min-h-[400px]">
           <Table>
-            <TableHeader className="bg-slate-50/50 dark:bg-slate-800/30">
-              <TableRow className="border-none hover:bg-transparent">
-                <TableHead className="w-12 px-8">
-                  <Checkbox 
-                    checked={selectedIds.length > 0 && selectedIds.length === paginatedUsers.length}
-                    onCheckedChange={() => setSelectedIds(selectedIds.length === paginatedUsers.length ? [] : paginatedUsers.map(u => u.id))}
-                    className="rounded-md border-slate-300 dark:border-slate-700 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                </TableHead>
-                <TableHead className="font-bold text-slate-400 dark:text-slate-500 py-6 text-[10px] uppercase tracking-widest">Operator Identity</TableHead>
-                <TableHead className="font-bold text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest">Access Policy</TableHead>
-                <TableHead className="font-bold text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest">Activity Audit</TableHead>
-                <TableHead className="font-bold text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest text-center">Security Status</TableHead>
-                <TableHead className="font-bold text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest text-right px-8">Actions</TableHead>
+            <TableHeader>
+              <TableRow className="border-slate-100 dark:border-slate-800/50 hover:bg-transparent">
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 pl-6 text-sm">Name</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Email</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Role</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Status</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-sm">Last Login</TableHead>
+                <TableHead className="py-4 font-medium text-slate-500 dark:text-slate-400 text-right pr-6 text-sm">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedUsers.map((u) => (
-                <TableRow key={u.id} className={cn(
-                  "border-b border-slate-50 dark:border-slate-800/50 transition-all group",
-                  selectedIds.includes(u.id) ? 'bg-primary/5 dark:bg-primary/10' : 'hover:bg-slate-50/30 dark:hover:hover:bg-slate-800/20'
-                )}>
-                  <TableCell className="px-8">
-                    <Checkbox 
-                      checked={selectedIds.includes(u.id)}
-                      onCheckedChange={() => toggleSelect(u.id)}
-                      className="rounded-md border-slate-300 dark:border-slate-700 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-4 py-4">
-                      <Avatar className="h-10 w-10 rounded-xl border-none bg-slate-100 dark:bg-slate-800 text-primary dark:text-white font-black shadow-sm group-hover:scale-105 transition-all">
-                        <AvatarFallback>{u.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white leading-tight">{u.name}</p>
-                        <div className="flex items-center gap-1.5 mt-1 opacity-60">
-                           <Mail className="h-3 w-3" />
-                           <span className="text-[10px] font-bold lowercase truncate max-w-[120px]">{u.email}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={cn(
-                      "rounded-lg px-2.5 py-1 font-black text-[9px] uppercase tracking-widest border-none shadow-sm",
-                      getRoleBadge(u.role)
-                    )}>
-                      {u.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3 text-slate-300" />
-                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Last Seen:</span>
-                      </div>
-                      <span className="text-[10px] font-medium text-slate-400 mt-0.5">
-                        {u.lastLogin ? new Date(u.lastLogin).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : 'Never Authenticated'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge className={cn(
-                      "rounded-lg px-2.5 py-1 font-black text-[9px] uppercase tracking-widest border-none shadow-sm transition-all",
-                      u.status === 'Active' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                    )}>
-                      {u.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right px-8">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                          <MoreVertical className="h-4 w-4 text-slate-400" />
+              {loading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <TableRow key={idx} className="border-slate-50 dark:border-slate-800/50">
+                    <TableCell className="pl-6 py-4"><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell className="pr-6 text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
+              ) : paginatedUsers.length > 0 ? (
+                paginatedUsers.map((u) => (
+                  <TableRow 
+                    key={u.id} 
+                    className="border-slate-50 dark:border-slate-800/50 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/20 group"
+                  >
+                    <TableCell className="py-4 pl-6 font-medium text-slate-900 dark:text-white">
+                      {u.name}
+                    </TableCell>
+                    <TableCell className="py-4 text-slate-500 dark:text-slate-400">
+                      {u.email}
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge className={cn(
+                        "rounded-full px-2.5 py-0.5 font-medium text-xs border-none shadow-none",
+                        u.role === 'Admin' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
+                        u.role === 'Manager' ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400' :
+                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      )}>
+                        {u.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge className={cn(
+                        "rounded-full px-2.5 py-0.5 font-medium text-xs border-none shadow-none",
+                        u.status === 'Active' 
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' 
+                          : 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
+                      )}>
+                        {u.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-4 text-slate-500 dark:text-slate-400 text-sm">
+                      {u.lastLogin ? new Date(u.lastLogin).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : '--'}
+                    </TableCell>
+                    <TableCell className="py-4 pr-6 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg"
+                          onClick={() => { setEditingUser(u); setIsFormOpen(true); }}
+                        >
+                          <Edit2 className="h-4 w-4" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 min-w-[180px] dark:bg-slate-800 bg-white">
-                        <DropdownMenuItem onClick={() => { setEditingUser(u); setIsFormOpen(true); }} className="rounded-xl gap-3 p-3 font-bold text-primary dark:text-white hover:bg-primary/5 cursor-pointer">
-                          <Edit className="h-4 w-4" /> Modify Access
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(u.id)} className="rounded-xl gap-3 p-3 font-bold text-destructive hover:bg-destructive/5 cursor-pointer">
-                          <Trash2 className="h-4 w-4" /> Deauthorize
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {paginatedUsers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-80 text-center">
-                    <div className="flex flex-col items-center justify-center opacity-40">
-                      <div className="bg-slate-50 dark:bg-slate-800 p-8 rounded-[2rem] mb-6">
-                         <Shield className="h-12 w-12 text-slate-300" />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/5 rounded-lg"
+                          onClick={() => handleDelete(u.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <p className="text-xl font-black text-slate-900 dark:text-white">No users discovered</p>
-                      <p className="text-sm font-medium text-slate-500 max-w-xs mt-2">No matching accounts found for the current identity search.</p>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-base font-medium text-slate-900 dark:text-white mt-4">No users found</p>
+                      <p className="text-sm text-slate-500 mt-1 mb-4">Try adjusting your search or filter.</p>
+                      <Button variant="outline" className="rounded-xl" onClick={() => { setSearchTerm(''); setRoleFilter('All'); setStatusFilter('All'); }}>
+                        Clear Filters
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -295,41 +258,30 @@ export default function UsersPage() {
           </Table>
         </div>
 
-        {/* Minimalist Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-10 py-8 bg-slate-50/30 dark:bg-slate-800/30 border-t border-slate-50 dark:border-slate-800">
-            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-              Page <span className="text-primary dark:text-white">{currentPage}</span> of <span className="text-primary dark:text-white">{totalPages}</span>
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800/50">
+            <p className="text-sm text-slate-500">
+              Showing <span className="font-medium text-slate-900 dark:text-white">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-slate-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="font-medium text-slate-900 dark:text-white">{filteredUsers.length}</span> results
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <Button 
-                variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-800 h-10 w-10 bg-white dark:bg-slate-900 shadow-sm" 
+                variant="outline" 
+                size="sm"
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => p - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                Previous
               </Button>
-              <div className="flex items-center gap-1 px-2">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <Button 
-                    key={i} 
-                    variant={currentPage === i + 1 ? 'default' : 'ghost'}
-                    className={cn(
-                      "h-10 w-10 rounded-xl font-black text-[10px]",
-                      currentPage === i + 1 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    )}
-                    onClick={() => setCurrentPage(i + 1)}
-                  >
-                    {i + 1}
-                  </Button>
-                ))}
-              </div>
               <Button 
-                variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-800 h-10 w-10 bg-white dark:bg-slate-900 shadow-sm"
+                variant="outline" 
+                size="sm" 
+                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => p + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                Next
               </Button>
             </div>
           </div>

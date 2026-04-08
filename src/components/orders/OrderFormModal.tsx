@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Order, OrderStatus } from '@/types/order';
 import { Product } from '@/types/product';
 import { productsAPI } from '@/services/productsAPI';
-import { Loader2, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Loader2, Plus, Trash2, X, ShoppingBag } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface OrderFormModalProps {
   isOpen: boolean;
@@ -77,102 +77,133 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] rounded-3xl overflow-hidden p-0 border-none shadow-2xl">
-        <div className="bg-primary p-8 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-white flex items-center gap-2">
-              <ShoppingBag className="h-6 w-6" />
+      <DialogContent className="sm:max-w-xl p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
+        
+        {/* Header Section */}
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <DialogHeader className="space-y-1.5 text-left">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <ShoppingBag className="h-5 w-5 text-primary" />
               {initialData ? 'Update Order' : 'Create New Order'}
             </DialogTitle>
-            <p className="text-white/70 font-medium">Process customer transactions and manage status.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Enter the details of the order transaction.
+            </p>
           </DialogHeader>
+          <button 
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-8 space-y-6 bg-white max-h-[70vh] overflow-y-auto">
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Customer Name</Label>
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 pb-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Customer Name</Label>
                 <Input 
                   value={formData.customerName}
                   onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                  className="h-12 bg-slate-50 border-none rounded-xl font-bold"
+                  className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                  placeholder="e.g. Ahmed Ali"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Order Status</Label>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as OrderStatus })}>
-                  <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold">
+                  <SelectTrigger className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm transition-all text-slate-900 dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-none shadow-xl">
-                    {STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+                    {STATUSES.map(s => <SelectItem key={s} value={s} className="text-sm">{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Order Items</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addItem} className="h-8 rounded-lg border-primary text-primary hover:bg-primary/5 font-bold">
-                  <Plus className="h-3 w-3 mr-1" /> Add Product
+                <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Order Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addItem} className="h-8 rounded-md border-primary text-primary hover:bg-primary/5 font-semibold text-xs">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Product
                 </Button>
               </div>
 
-              {formData.items.map((item, index) => (
-                <div key={index} className="flex gap-3 items-end p-4 bg-slate-50 rounded-2xl relative group">
-                  <div className="flex-1 space-y-1">
-                    <Label className="text-[10px] font-bold text-slate-400">Product</Label>
-                    <Select 
-                      value={item.productId} 
-                      onValueChange={(v) => updateItem(index, 'productId', v)}
-                    >
-                      <SelectTrigger className="h-10 bg-white border-slate-100 rounded-lg font-bold">
-                        <SelectValue placeholder="Select product" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-none shadow-xl">
-                        {products.map(p => (
-                          <SelectItem key={p.id} value={p.id} disabled={p.stock <= 0}>
-                            {p.name} (${p.price}) - {p.stock} {p.unit} left
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <div className="space-y-3">
+                {formData.items.map((item, index) => (
+                  <div key={index} className="flex gap-3 items-end p-4 bg-slate-50/50 dark:bg-background/50 border border-slate-100 dark:border-slate-800 rounded-lg relative group transition-all hover:border-primary/30">
+                    <div className="flex-1 space-y-1.5">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase">Product</Label>
+                      <Select 
+                        value={item.productId} 
+                        onValueChange={(v) => updateItem(index, 'productId', v)}
+                      >
+                        <SelectTrigger className="h-10 bg-white dark:bg-card border-slate-200 dark:border-slate-700 rounded-md shadow-sm">
+                          <SelectValue placeholder="Select product" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+                          {products.map(p => (
+                            <SelectItem key={p.id} value={p.id} disabled={p.stock <= 0} className="text-sm">
+                              <span className="font-medium">{p.name}</span>
+                              <span className="ml-2 text-xs text-slate-400">(${p.price}) • {p.stock} left</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="w-20 sm:w-24 space-y-1.5">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase">Qty</Label>
+                      <Input 
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                        className="h-10 bg-white dark:bg-card border-slate-200 dark:border-slate-700 rounded-md shadow-sm text-center font-medium"
+                      />
+                    </div>
+
+                    {formData.items.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeItem(index)}
+                        className="h-10 w-10 text-slate-400 hover:text-destructive hover:bg-destructive/5"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
-                  <div className="w-24 space-y-1">
-                    <Label className="text-[10px] font-bold text-slate-400">Qty</Label>
-                    <Input 
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
-                      className="h-10 bg-white border-slate-100 rounded-lg font-bold"
-                    />
-                  </div>
-                  {formData.items.length > 1 && (
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => removeItem(index)}
-                      className="h-10 w-10 text-destructive hover:bg-destructive/5"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
           
-          <DialogFooter className="pt-4 gap-3">
-            <Button type="button" variant="ghost" onClick={onClose} className="h-12 flex-1 rounded-xl font-bold text-slate-500">Cancel</Button>
-            <Button type="submit" disabled={loading} className="h-12 flex-1 rounded-xl bg-primary shadow-lg shadow-primary/20 font-bold">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : initialData ? 'Update Order' : 'Place Order'}
+          {/* Footer Section */}
+          <div className="px-6 py-4 bg-white dark:bg-card border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 flex-col sm:flex-row">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              className="h-11 px-5 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-background text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+            >
+              Cancel
             </Button>
-          </DialogFooter>
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="h-11 px-6 rounded-md bg-primary hover:bg-primary/90 text-white font-medium shadow-sm transition-all w-full sm:w-auto"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {initialData ? 'Update Order' : 'Place Order'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
