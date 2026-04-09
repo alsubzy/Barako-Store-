@@ -15,10 +15,15 @@ import {
   Boxes,
   ShieldCheck,
   CreditCard,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout, products } = useStore();
   
@@ -39,11 +44,17 @@ export default function Sidebar() {
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || 'staff'));
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-card">
+    <aside className="h-full w-64 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-card">
       <div className="flex h-full flex-col px-4 py-8">
         {/* BRANDING */}
-        <div className="mb-10 px-3">
-          <Logo />
+        <div className="mb-10 px-3 flex items-center justify-between">
+          <Logo size="lg" />
+          <button 
+            onClick={onClose}
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* NAVIGATION */}

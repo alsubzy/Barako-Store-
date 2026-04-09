@@ -114,7 +114,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 3. CHARTS & ACTIVITY */}
-      <div className="grid gap-6 md:grid-cols-7">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
         <Card className="md:col-span-4 border border-slate-100 dark:border-slate-800/50 shadow-sm rounded-2xl bg-white dark:bg-card overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800/50 px-6 py-4">
             <div>

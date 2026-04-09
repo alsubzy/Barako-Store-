@@ -32,7 +32,8 @@ import {
   Building2,
   Lock,
   Camera,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -104,15 +105,15 @@ export default function SettingsPage() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">Manage your system environment and user profile</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="h-10 px-4 rounded-xl font-bold text-xs border-slate-200 dark:border-slate-800">
+          <Button variant="secondary" icon={X}>
             Discard
           </Button>
           <Button 
             onClick={() => handleUpdate(activeSection as any, data[activeSection === 'notifications' ? 'preferences' : activeSection])}
             disabled={saving}
-            className="h-10 px-6 rounded-xl bg-[#3338A0] text-white font-bold text-xs shadow-lg shadow-[#3338A0]/10"
+            icon={saving ? Loader2 : Save}
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
+            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
@@ -120,7 +121,7 @@ export default function SettingsPage() {
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* 2. SIDEBAR NAVIGATION */}
         <aside className="w-full lg:w-64 space-y-1 shrink-0">
-          <nav className="flex flex-col gap-1 p-1 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+          <nav className="flex flex-row lg:flex-col gap-1 p-1 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-x-auto lg:overflow-x-visible no-scrollbar">
             {menuItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -128,9 +129,9 @@ export default function SettingsPage() {
                   key={item.id}
                   onClick={() => setActiveSection(item.id as SettingSection)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 shrink-0 lg:shrink",
                     isActive 
-                      ? "bg-[#3338A0] text-white shadow-lg shadow-[#3338A0]/20" 
+                      ? "bg-[#0B1221] text-white shadow-lg shadow-[#0B1221]/20" 
                       : "text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                   )}
                 >
@@ -161,41 +162,36 @@ export default function SettingsPage() {
                         <Input 
                           value={data.general.businessName}
                           onChange={(e) => setData({ ...data, general: { ...data.general, businessName: e.target.value } })}
-                          className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
+                          icon={Building2}
+                          className="h-11"
                         />
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Official Email</Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                          <Input 
-                            value={data.general.email}
-                            onChange={(e) => setData({ ...data, general: { ...data.general, email: e.target.value } })}
-                            className="h-11 pl-9 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
-                          />
-                        </div>
+                        <Input 
+                          value={data.general.email}
+                          onChange={(e) => setData({ ...data, general: { ...data.general, email: e.target.value } })}
+                          icon={Mail}
+                          className="h-11"
+                        />
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Support Phone</Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                          <Input 
-                            value={data.general.phone}
-                            onChange={(e) => setData({ ...data, general: { ...data.general, phone: e.target.value } })}
-                            className="h-11 pl-9 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
-                          />
-                        </div>
+                        <Input 
+                          value={data.general.phone}
+                          onChange={(e) => setData({ ...data, general: { ...data.general, phone: e.target.value } })}
+                          icon={Phone}
+                          className="h-11"
+                        />
                       </div>
                       <div className="space-y-1.5">
                          <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Store Location</Label>
-                         <div className="relative">
-                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                           <Input 
-                             value={data.general.address}
-                             onChange={(e) => setData({ ...data, general: { ...data.general, address: e.target.value } })}
-                             className="h-11 pl-9 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
-                           />
-                         </div>
+                         <Input 
+                           value={data.general.address}
+                           onChange={(e) => setData({ ...data, general: { ...data.general, address: e.target.value } })}
+                           icon={MapPin}
+                           className="h-11"
+                         />
                       </div>
                     </div>
                  </CardContent>
@@ -233,7 +229,8 @@ export default function SettingsPage() {
                         <Input 
                           value={data.account.name}
                           onChange={(e) => setData({ ...data, account: { ...data.account, name: e.target.value } })}
-                          className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
+                          icon={User}
+                          className="h-11"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -241,7 +238,8 @@ export default function SettingsPage() {
                         <Input 
                           value={data.account.email}
                           onChange={(e) => setData({ ...data, account: { ...data.account, email: e.target.value } })}
-                          className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl font-medium text-sm"
+                          icon={Mail}
+                          className="h-11"
                         />
                       </div>
                     </div>
@@ -261,7 +259,7 @@ export default function SettingsPage() {
                  <CardContent className="p-8 space-y-6">
                     <div className="flex items-center justify-between p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                       <div className="flex gap-4 items-center">
-                         <div className="h-10 w-10 rounded-xl bg-white dark:bg-card border border-slate-100 dark:border-slate-800 flex items-center justify-center text-[#3338A0]">
+                         <div className="h-10 w-10 rounded-xl bg-white dark:bg-card border border-slate-100 dark:border-slate-800 flex items-center justify-center text-[#0B1221]">
                             <Smartphone className="h-5 w-5" />
                          </div>
                          <div>
@@ -272,7 +270,7 @@ export default function SettingsPage() {
                       <Switch 
                         checked={data.security.twoFactorEnabled}
                         onCheckedChange={(v) => handleUpdate('security', { ...data.security, twoFactorEnabled: v })}
-                        className="data-[state=checked]:bg-[#3338A0]"
+                        className="data-[state=checked]:bg-[#0B1221]"
                       />
                     </div>
                  </CardContent>
@@ -280,22 +278,26 @@ export default function SettingsPage() {
 
               <Card className="border border-slate-100 dark:border-slate-800 shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-card">
                  <CardHeader className="px-8 pt-8 pb-0">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-[#3338A0]">Credentials Reset</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-[#0B1221] dark:text-white">Credentials Reset</h4>
                  </CardHeader>
                  <CardContent className="p-8 space-y-6">
                     <div className="space-y-1.5">
-                       <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Current Password</Label>
-                       <Input type="password" placeholder="••••••••" className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl" />
+                     <div className="space-y-1.5">
+                        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Current Password</Label>
+                        <Input type="password" placeholder="••••••••" icon={Lock} className="h-11" />
+                     </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <div className="space-y-1.5">
-                         <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">New Secure Password</Label>
-                         <Input type="password" placeholder="••••••••" className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl" />
+                        <div className="space-y-1.5">
+                          <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">New Secure Password</Label>
+                          <Input type="password" placeholder="••••••••" icon={Lock} className="h-11" />
+                        </div>
                        </div>
                        <div className="space-y-1.5">
-                         <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Confirm New Password</Label>
-                         <Input type="password" placeholder="••••••••" className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 rounded-xl" />
-                       </div>
+                          <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Confirm New Password</Label>
+                          <Input type="password" placeholder="••••••••" icon={Lock} className="h-11" />
+                        </div>
                     </div>
                  </CardContent>
               </Card>
@@ -314,11 +316,11 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-1.5 border-b border-slate-50 dark:border-slate-800 pb-1">
-                             <Globe className="h-3 w-3 text-[#3338A0]" />
+                             <Globe className="h-3 w-3 text-[#0B1221]" />
                              <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">System Language</Label>
                           </div>
                           <Select value={data.preferences.language} onValueChange={(v) => handleUpdate('preferences', { ...data.preferences, language: v })}>
-                             <SelectTrigger className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none font-medium text-sm transition-all focus:ring-1">
+                             <SelectTrigger icon={Globe} className="h-11 rounded-xl">
                                 <SelectValue placeholder="Language" />
                              </SelectTrigger>
                              <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
@@ -335,7 +337,7 @@ export default function SettingsPage() {
                              <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Global Currency</Label>
                           </div>
                           <Select value={data.preferences.currency} onValueChange={(v) => handleUpdate('preferences', { ...data.preferences, currency: v })}>
-                             <SelectTrigger className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none font-medium text-sm transition-all focus:ring-1">
+                             <SelectTrigger icon={DollarSign} className="h-11 rounded-xl">
                                 <SelectValue placeholder="Currency" />
                              </SelectTrigger>
                              <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
@@ -381,7 +383,7 @@ export default function SettingsPage() {
                          <Switch 
                             defaultChecked={idx < 2}
                             onCheckedChange={() => {}}
-                            className="data-[state=checked]:bg-[#3338A0]"
+                            className="data-[state=checked]:bg-[#0B1221]"
                          />
                       </div>
                     ))}

@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, UserRole, UserStatus } from '@/types/user';
-import { Loader2, X, User as UserIcon, Mail, Key } from 'lucide-react';
+import { Loader2, X, User as UserIcon, Mail, Key, Shield, Activity, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/shared/Logo';
 
 interface UserFormModalProps {
   isOpen: boolean;
@@ -67,24 +68,30 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[480px] p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:max-w-[480px] p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
         
+        {/* Brand/Logo Section */}
+        <div className="flex flex-col items-center mb-6">
+          <Logo size="md" clickable={false} />
+        </div>
+
         {/* Header Section */}
         <div className="flex items-start justify-between mb-8">
           <div className="space-y-1">
-            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white text-center sm:text-left">
               {initialData ? 'Update User Account' : 'Create New User'}
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">
               {initialData ? 'Modify access and permissions for this user.' : 'Enter user details to create a new account'}
             </DialogDescription>
           </div>
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            className="text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -93,36 +100,28 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
             {/* Full Name */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Full Name</Label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                  <UserIcon className="h-4 w-4" />
-                </div>
-                <Input 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-11 w-full pl-10 bg-gray-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary shadow-none transition-all text-slate-900 dark:text-white"
-                  placeholder="e.g. Ahmed Ali"
-                  required
-                />
-              </div>
+              <Input 
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                icon={UserIcon}
+                placeholder="Ahmed Ali"
+                required
+                className="h-11"
+              />
             </div>
             
             {/* Email */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Email Address</Label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <Input 
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-11 w-full pl-10 bg-gray-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary shadow-none transition-all text-slate-900 dark:text-white"
-                  placeholder="example@email.com"
-                  required
-                />
-              </div>
+              <Input 
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                icon={Mail}
+                placeholder="example@email.com"
+                required
+                className="h-11"
+              />
             </div>
 
             {/* Password */}
@@ -130,19 +129,15 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
               <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 {initialData ? 'New Password (Optional)' : 'Initial Password'}
               </Label>
-              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                  <Key className="h-4 w-4" />
-                </div>
-                <Input 
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-11 w-full pl-10 bg-gray-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary shadow-none transition-all text-slate-900 dark:text-white"
-                  placeholder="••••••••"
-                  required={!initialData}
-                />
-              </div>
+              <Input 
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                icon={Key}
+                placeholder="••••••••"
+                required={!initialData}
+                className="h-11"
+              />
             </div>
 
             {/* Role & Status */}
@@ -150,7 +145,7 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">System Role</Label>
                 <Select value={formData.role} onValueChange={(v) => setFormData({ ...formData, role: v as UserRole })}>
-                  <SelectTrigger className="h-11 w-full bg-gray-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-none transition-all text-slate-900 dark:text-white">
+                  <SelectTrigger icon={Shield} className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-card">
@@ -162,7 +157,7 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-slate-700 dark:text-slate-200">Account Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as UserStatus })}>
-                  <SelectTrigger className="h-11 w-full bg-gray-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-none transition-all text-slate-900 dark:text-white">
+                  <SelectTrigger icon={Activity} className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-card">
@@ -177,9 +172,10 @@ export function UserFormModal({ isOpen, onClose, onSubmit, initialData }: UserFo
           <Button 
             type="submit" 
             disabled={loading} 
-            className="h-12 w-full rounded-lg bg-[#3338A0] hover:bg-[#282D85] text-white font-bold shadow-lg shadow-primary/10 transition-all mt-4"
+            className="w-full"
+            icon={loading ? Loader2 : (initialData ? Shield : Plus)}
           >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : initialData ? 'Save Changes' : 'Create Account'}
+            {loading ? 'Processing...' : (initialData ? 'Save Changes' : 'Create Account')}
           </Button>
         </form>
       </DialogContent>

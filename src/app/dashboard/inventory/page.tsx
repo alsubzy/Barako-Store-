@@ -85,17 +85,17 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-primary">Inventory Management</h1>
           <p className="text-muted-foreground">Monitor stock levels and movement across your store.</p>
         </div>
-        <Button onClick={fetchData} variant="outline" className="gap-2">
-          <RefreshCw className="h-4 w-4" /> Refresh Data
+        <Button onClick={fetchData} variant="outline" icon={RefreshCw} className="order-first sm:order-last">
+          Refresh Data
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="border shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -136,11 +136,11 @@ export default function InventoryPage() {
 
         <TabsContent value="status" className="space-y-4 pt-4">
           <div className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm border">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex-1 min-w-[300px]">
               <Input 
                 placeholder="Search inventory items..." 
-                className="pl-10" 
+                icon={Search}
+                className="h-11 rounded-xl"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -181,10 +181,11 @@ export default function InventoryPage() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          icon={RefreshCw}
                           onClick={() => { setSelectedItem(item); setIsUpdateOpen(true); }}
                           className="hover:bg-primary/10 text-primary"
                         >
-                          <RefreshCw className="h-4 w-4 mr-2" /> Adjust
+                          Adjust
                         </Button>
                       </TableCell>
                     </TableRow>

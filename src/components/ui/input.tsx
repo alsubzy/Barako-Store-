@@ -1,19 +1,31 @@
 import * as React from "react"
-
+import { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon?: LucideIcon;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, icon: Icon, ...props }, ref) => {
     return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
+      <div className="relative w-full group">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#3338A0] transition-colors duration-200">
+            <Icon size={18} />
+          </div>
         )}
-        ref={ref}
-        {...props}
-      />
+        <input
+          type={type}
+          className={cn(
+            "flex w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-800 rounded-xl py-3 text-base transition-all duration-200 placeholder:text-gray-400 focus-visible:outline-none focus-visible:border-[#3338A0] focus-visible:ring-2 focus-visible:ring-[#3338A0]/20 hover:border-gray-300 dark:hover:border-slate-700 disabled:cursor-not-allowed disabled:opacity-50",
+            Icon ? "pl-11 pr-4" : "px-4",
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      </div>
     )
   }
 )

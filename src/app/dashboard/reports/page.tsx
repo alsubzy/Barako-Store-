@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Logo } from '@/components/shared/Logo';
 
 const COLORS = ['#3338A0', '#FCC61D', '#10B981', '#F43F5E', '#8B5CF6'];
 
@@ -118,6 +119,15 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* 0. PRINT ONLY HEADER */}
+      <div className="hidden print:flex flex-col items-center justify-center border-b-2 border-slate-900 pb-12 mb-12 text-center">
+        <Logo size="xl" clickable={false} />
+        <div className="mt-6">
+          <h1 className="text-4xl font-black uppercase tracking-tight text-slate-900">Business performance Audit</h1>
+          <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-sm mt-2">{new Date().toLocaleDateString(undefined, { dateStyle: 'full' })}</p>
+        </div>
+      </div>
+
       {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -126,14 +136,14 @@ export default function ReportsPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => window.print()} className="h-10 px-4 rounded-xl font-medium border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50">
-            <Printer className="mr-2 h-4 w-4" /> Print
+          <Button variant="outline" onClick={() => window.print()} icon={Printer}>
+            Print
           </Button>
           <Button 
             onClick={() => exportToCSV(ordersData, 'barako-orders-report')}
-            className="h-10 px-5 rounded-full bg-primary text-white shadow-sm hover:shadow-md transition-all hover:bg-primary/90"
+            icon={Download}
           >
-            <Download className="mr-2 h-4 w-4" /> Export Report
+            Export Report
           </Button>
         </div>
       </div>
@@ -171,17 +181,17 @@ export default function ReportsPage() {
           </TabsList>
 
           <div className="flex items-center gap-3">
-             <div className="relative w-72 hidden md:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+             <div className="w-72 hidden md:block">
                 <Input 
                   placeholder="Filter report data..." 
-                  className="pl-9 h-10 rounded-xl border border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-sm bg-white dark:bg-card"
+                  icon={Search}
+                  className="h-11 rounded-xl"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
              </div>
              <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-                <SelectTrigger className="h-10 w-36 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+                <SelectTrigger icon={Filter} className="h-11 w-40 rounded-xl">
                   <SelectValue placeholder="Range" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg">
@@ -194,7 +204,7 @@ export default function ReportsPage() {
         </div>
 
         <TabsContent value="overview" className="space-y-6 outline-none">
-          <div className="grid gap-6 md:grid-cols-7">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
             <Card className="md:col-span-4 border border-slate-100 dark:border-slate-800/50 shadow-sm rounded-2xl bg-white dark:bg-card overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800/50 px-6 py-4">
                 <div>
@@ -277,19 +287,17 @@ export default function ReportsPage() {
                       <p key={i} className="text-white/90 leading-relaxed mb-3">{line}</p>
                     ))}
                   </div>
-                  <Button variant="outline" className="mt-6 border-white/20 text-white hover:bg-white/10 rounded-xl px-6 font-bold text-xs" onClick={() => setInsight(null)}>Reset Analysis</Button>
+                  <Button variant="outline" className="mt-6 font-bold text-xs" onClick={() => setInsight(null)}>Reset Analysis</Button>
                 </div>
               ) : (
                 <Button 
                   onClick={generateAIInsights} 
                   disabled={isGenerating}
-                  className="h-12 px-8 rounded-full bg-[#FCC61D] text-[#3338A0] font-black text-sm shadow-xl shadow-[#FCC61D]/20 hover:scale-105 transition-all"
+                  variant="premium"
+                  className="h-12 px-8"
+                  icon={isGenerating ? Loader2 : Sparkles}
                 >
-                  {isGenerating ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Orchestrating Intelligence...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Strategic Audit</>
-                  )}
+                  {isGenerating ? 'Orchestrating Intelligence...' : 'Generate Strategic Audit'}
                 </Button>
               )}
             </CardContent>

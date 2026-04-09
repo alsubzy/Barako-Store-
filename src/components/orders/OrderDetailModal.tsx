@@ -21,12 +21,12 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[700px] p-0 rounded-2xl border-slate-100 dark:border-slate-800 bg-white dark:bg-card shadow-lg overflow-hidden">
+      <DialogContent className="w-[95vw] sm:max-w-[700px] p-0 rounded-2xl border-slate-100 dark:border-slate-800 bg-white dark:bg-card shadow-lg overflow-hidden">
         
         {/* Header Section */}
         <div className="bg-slate-50/50 dark:bg-background/50 p-8 border-b border-slate-100 dark:border-slate-800 relative">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <Logo size="lg" clickable={false} showText={false} />
+            <Logo size="lg" clickable={false} showText={true} />
             
             <div className="flex-1 text-center sm:text-left space-y-1.5">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -47,12 +47,13 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
               </p>
             </div>
           </div>
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors p-1"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            className="absolute top-6 right-6 text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
         </div>
 
         {/* Content Section */}

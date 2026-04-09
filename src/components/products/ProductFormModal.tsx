@@ -31,6 +31,7 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/shared/Logo';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -88,13 +89,18 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[480px] p-0 border-none shadow-2xl overflow-hidden bg-white dark:bg-card rounded-2xl">
+      <DialogContent className="w-[95vw] sm:max-w-[480px] p-0 border-none shadow-2xl overflow-hidden bg-white dark:bg-card rounded-2xl">
+        {/* Brand Section */}
+        <div className="pt-8 px-8 flex justify-center border-b border-slate-50 dark:border-slate-800 pb-4">
+          <Logo size="md" clickable={false} />
+        </div>
+
         {/* PREMIUM MINIMALIST HEADER */}
-        <div className="px-8 pt-8 pb-4">
+        <div className="px-8 pt-6 pb-4">
           <DialogHeader>
             <div className="flex items-center justify-between">
-              <div className="h-12 w-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-primary dark:text-white mb-4">
-                <Package className="h-6 w-6" />
+              <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-primary dark:text-white">
+                <Package className="h-5 w-5" />
               </div>
               <Button 
                 variant="ghost" 
@@ -105,7 +111,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white mt-4">
               {initialData ? 'Update Product' : 'Create New Product'}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 font-medium">
@@ -119,26 +125,22 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
             {/* PRODUCT NAME */}
             <div className="space-y-1.5">
               <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Product Name</Label>
-              <div className="relative group">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                  <Tag className="h-4 w-4" />
-                </div>
-                <Input 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-11 pl-10 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-primary/20 font-medium text-sm"
-                  placeholder="e.g. Fresh Bananas"
-                  required
-                />
-              </div>
+              <Input 
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                icon={Tag}
+                className="h-11 font-medium text-sm"
+                placeholder="Fresh Bananas"
+                required
+              />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* CATEGORY */}
               <div className="space-y-1.5">
                 <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Category</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                  <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl font-medium text-sm">
+                  <SelectTrigger icon={Layers} className="h-11 font-medium text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-xl bg-white dark:bg-card">
@@ -151,7 +153,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
               <div className="space-y-1.5">
                 <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Stock Unit</Label>
                 <Select value={formData.unit} onValueChange={(v) => setFormData({ ...formData, unit: v })}>
-                  <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl font-medium text-sm">
+                  <SelectTrigger icon={Package} className="h-11 font-medium text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-xl bg-white dark:bg-card">
@@ -161,82 +163,65 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* PRICE */}
               <div className="space-y-1.5">
                 <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Price ($)</Label>
-                <div className="relative group">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                    <DollarSign className="h-4 w-4" />
-                  </div>
-                  <Input 
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                    className="h-11 pl-10 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-primary/20 font-semibold text-sm"
-                    required
-                  />
-                </div>
+                <Input 
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                  icon={DollarSign}
+                  className="h-11 font-semibold text-sm"
+                  required
+                />
               </div>
 
               {/* STOCK */}
               <div className="space-y-1.5">
                 <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Current Stock</Label>
-                <div className="relative group">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                    <Layers className="h-4 w-4" />
-                  </div>
-                  <Input 
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                    className="h-11 pl-10 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-primary/20 font-semibold text-sm"
-                    required
-                  />
-                </div>
+                <Input 
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                  icon={Layers}
+                  className="h-11 font-semibold text-sm"
+                  required
+                />
               </div>
             </div>
 
             {/* IMAGE URL */}
             <div className="space-y-1.5">
               <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Product Media URL (Optional)</Label>
-              <div className="relative group">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-                <Input 
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="h-11 pl-10 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-primary/20 font-medium text-sm"
-                  placeholder="https://images.unsplash.com/..."
-                />
-              </div>
+              <Input 
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                icon={ImageIcon}
+                className="h-11 font-medium text-sm"
+                placeholder="https://images.unsplash.com/..."
+              />
             </div>
           </div>
           
-          <DialogFooter className="pt-4 gap-3 md:gap-0 flex-row">
+          <DialogFooter className="pt-4 gap-3 md:gap-0 flex-col sm:flex-row">
             <Button 
               type="button" 
-              variant="outline" 
+              variant="secondary" 
               onClick={onClose} 
-              className="flex-1 h-11 rounded-xl font-bold border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-none outline-none mr-3"
+              className="flex-1 mr-3"
+              icon={X}
             >
               Discard
             </Button>
             <Button 
               type="submit" 
               disabled={loading} 
-              className="flex-1 h-11 rounded-xl bg-primary text-white shadow-xl shadow-primary/20 font-bold hover:bg-primary/90 transition-all"
+              className="flex-1"
+              icon={loading ? Loader2 : CheckCircle2}
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <div className="flex items-center gap-2">
-                   <CheckCircle2 className="h-4 w-4" />
-                   {initialData ? 'Update Item' : 'Create Item'}
-                </div>
-              )}
+              {loading ? 'Processing...' : (initialData ? 'Update Item' : 'Create Item')}
             </Button>
           </DialogFooter>
         </form>

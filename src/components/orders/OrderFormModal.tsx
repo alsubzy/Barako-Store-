@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Order, OrderStatus } from '@/types/order';
 import { Product } from '@/types/product';
 import { productsAPI } from '@/services/productsAPI';
-import { Loader2, Plus, Trash2, X, ShoppingBag } from 'lucide-react';
+import { Loader2, Plus, Trash2, X, ShoppingBag, User, Activity, Package, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/shared/Logo';
 
 interface OrderFormModalProps {
   isOpen: boolean;
@@ -77,8 +78,13 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-xl p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:max-w-xl p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
         
+        {/* Brand Section */}
+        <div className="pt-8 px-6 flex justify-center border-b border-slate-50 dark:border-slate-800 pb-4">
+          <Logo size="md" clickable={false} />
+        </div>
+
         {/* Header Section */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <DialogHeader className="space-y-1.5 text-left">
@@ -90,12 +96,13 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
               Enter the details of the order transaction.
             </p>
           </DialogHeader>
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-1"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            className="text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
         </div>
         
         <form onSubmit={handleSubmit}>
@@ -107,19 +114,20 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
                 <Input 
                   value={formData.customerName}
                   onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                  className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
-                  placeholder="e.g. Ahmed Ali"
+                  icon={User}
+                  placeholder="Ahmed Ali"
                   required
+                  className="h-11"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as OrderStatus })}>
-                  <SelectTrigger className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm transition-all text-slate-900 dark:text-white">
+                  <SelectTrigger icon={Activity} className="h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+                  <SelectContent className="rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
                     {STATUSES.map(s => <SelectItem key={s} value={s} className="text-sm">{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -129,8 +137,8 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Order Items</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addItem} className="h-8 rounded-md border-primary text-primary hover:bg-primary/5 font-semibold text-xs">
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Product
+                <Button type="button" variant="outline" size="sm" icon={Plus} onClick={addItem} className="h-9">
+                  Add Product
                 </Button>
               </div>
 
@@ -143,10 +151,10 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
                         value={item.productId} 
                         onValueChange={(v) => updateItem(index, 'productId', v)}
                       >
-                        <SelectTrigger className="h-10 bg-white dark:bg-card border-slate-200 dark:border-slate-700 rounded-md shadow-sm">
+                        <SelectTrigger icon={Package} className="h-10">
                           <SelectValue placeholder="Select product" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
+                        <SelectContent className="rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
                           {products.map(p => (
                             <SelectItem key={p.id} value={p.id} disabled={p.stock <= 0} className="text-sm">
                               <span className="font-medium">{p.name}</span>
@@ -164,7 +172,8 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
                         min="1"
                         value={item.quantity}
                         onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
-                        className="h-10 bg-white dark:bg-card border-slate-200 dark:border-slate-700 rounded-md shadow-sm text-center font-medium"
+                        icon={Layers}
+                        className="h-10 text-center font-medium"
                       />
                     </div>
 
@@ -173,11 +182,10 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
                         type="button" 
                         variant="ghost" 
                         size="icon" 
+                        icon={Trash2}
                         onClick={() => removeItem(index)}
                         className="h-10 w-10 text-slate-400 hover:text-destructive hover:bg-destructive/5"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      />
                     )}
                   </div>
                 ))}
@@ -189,19 +197,20 @@ export function OrderFormModal({ isOpen, onClose, onSubmit, initialData }: Order
           <div className="px-6 py-4 bg-white dark:bg-card border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 flex-col sm:flex-row">
             <Button 
               type="button" 
-              variant="outline" 
+              variant="secondary" 
               onClick={onClose} 
-              className="h-11 px-5 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-background text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+              icon={X}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={loading} 
-              className="h-11 px-6 rounded-md bg-primary hover:bg-primary/90 text-white font-medium shadow-sm transition-all w-full sm:w-auto"
+              icon={loading ? Loader2 : ShoppingBag}
+              className="w-full sm:w-auto"
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? 'Update Order' : 'Place Order'}
+              {loading ? 'Processing...' : (initialData ? 'Update Order' : 'Place Order')}
             </Button>
           </div>
         </form>

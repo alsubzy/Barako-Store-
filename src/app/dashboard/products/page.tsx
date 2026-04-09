@@ -108,14 +108,14 @@ export default function ProductsPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="h-10 px-4 rounded-xl font-medium border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50">
-            <Download className="mr-2 h-4 w-4" /> Export
+          <Button variant="outline" icon={Download}>
+            Export
           </Button>
           <Button 
             onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} 
-            className="h-10 px-5 rounded-full bg-primary text-white shadow-sm hover:shadow-md transition-all hover:bg-primary/90"
+            icon={Plus}
           >
-            <Plus className="mr-2 h-4 w-4" /> Add Product
+            Add Product
           </Button>
         </div>
       </div>
@@ -140,18 +140,18 @@ export default function ProductsPage() {
 
       {/* 3. FILTER BAR */}
       <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full md:flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="w-full md:flex-1">
           <Input 
             placeholder="Search products by name or SKU..." 
-            className="pl-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-primary/30 shadow-sm bg-white dark:bg-card w-full"
+            icon={Search}
+            className="h-11 rounded-xl"
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           />
         </div>
         
         <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
-          <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-card">
+          <SelectTrigger icon={Filter} className="w-full md:w-[180px] h-11 rounded-xl">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
@@ -242,19 +242,17 @@ export default function ProductsPage() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg"
+                          icon={Edit2}
+                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/5"
                           onClick={() => { setEditingProduct(p); setIsFormOpen(true); }}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
+                        />
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/5 rounded-lg"
+                          icon={Trash2}
+                          className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/5"
                           onClick={() => handleDelete(p.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -266,7 +264,7 @@ export default function ProductsPage() {
                       <Package className="h-10 w-10 text-slate-300 mb-4" />
                       <p className="text-base font-medium text-slate-900 dark:text-white">No products found</p>
                       <p className="text-sm text-slate-500 mt-1 mb-4">Try adjusting your search or filters.</p>
-                      <Button variant="outline" className="rounded-xl" onClick={() => { setSearchTerm(''); setCategoryFilter('All'); }}>
+                      <Button variant="outline" icon={Search} onClick={() => { setSearchTerm(''); setCategoryFilter('All'); }}>
                         Clear Filters
                       </Button>
                     </div>
@@ -287,7 +285,7 @@ export default function ProductsPage() {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                className="disabled:opacity-50"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => p - 1)}
               >
@@ -296,7 +294,7 @@ export default function ProductsPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="rounded-lg border-slate-200 dark:border-slate-800 shadow-sm disabled:opacity-50"
+                className="disabled:opacity-50"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => p + 1)}
               >

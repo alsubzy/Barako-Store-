@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InventoryItem, StockAction } from '@/types/inventory';
-import { Loader2, Plus, Minus } from 'lucide-react';
+import { Loader2, Plus, Minus, X, Layers, CheckCircle2 } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 
 interface StockUpdateModalProps {
   isOpen: boolean;
@@ -37,13 +38,27 @@ export function StockUpdateModal({ isOpen, onClose, onSubmit, item }: StockUpdat
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Adjust Stock Inventory</DialogTitle>
-          <DialogDescription>
-            Update stock levels for <strong>{item.productName}</strong>.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[95vw] sm:max-w-[425px] [&>button]:hidden">
+        {/* Brand Section */}
+        <div className="pt-8 px-6 flex justify-center border-b border-slate-50 dark:border-slate-800 pb-4">
+          <Logo size="md" clickable={false} />
+        </div>
+
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <DialogHeader>
+            <DialogTitle>Adjust Stock Inventory</DialogTitle>
+            <DialogDescription>
+              Update stock levels for <strong>{item.productName}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid gap-4">
@@ -64,18 +79,20 @@ export function StockUpdateModal({ isOpen, onClose, onSubmit, item }: StockUpdat
                 <Button
                   type="button"
                   variant={action === 'add' ? 'default' : 'outline'}
+                  icon={Plus}
                   onClick={() => setAction('add')}
-                  className="w-full gap-2"
+                  className="w-full"
                 >
-                  <Plus className="h-4 w-4" /> Add Stock
+                  Add Stock
                 </Button>
                 <Button
                   type="button"
                   variant={action === 'remove' ? 'destructive' : 'outline'}
+                  icon={Minus}
                   onClick={() => setAction('remove')}
-                  className="w-full gap-2"
+                  className="w-full"
                 >
-                  <Minus className="h-4 w-4" /> Remove Stock
+                  Remove Stock
                 </Button>
               </div>
             </div>
@@ -88,7 +105,9 @@ export function StockUpdateModal({ isOpen, onClose, onSubmit, item }: StockUpdat
                 min="1"
                 value={quantity || ''}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                icon={Layers}
                 required
+                className="h-11"
               />
             </div>
 
@@ -99,13 +118,16 @@ export function StockUpdateModal({ isOpen, onClose, onSubmit, item }: StockUpdat
             )}
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+          <DialogFooter className="flex-col sm:flex-row gap-3">
+            <Button type="button" variant="secondary" onClick={onClose} disabled={loading} icon={X}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || (action === 'remove' && quantity > item.stockQuantity)}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+            <Button 
+              type="submit" 
+              disabled={loading || (action === 'remove' && quantity > item.stockQuantity)}
+              icon={loading ? Loader2 : CheckCircle2}
+            >
+              {loading ? 'Updating...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

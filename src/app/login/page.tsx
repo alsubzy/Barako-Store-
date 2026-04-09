@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Logo } from '@/components/shared/Logo';
-import { Eye, EyeOff, ArrowUpRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowUpRight, Mail, Key, Loader2, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -53,13 +53,14 @@ export default function LoginPage() {
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-bold text-slate-600">Email</Label>
             <Input 
-              id="email" 
-              type="email" 
-              placeholder="mail@example.com" 
+              id="email"
+              type="email"
+              placeholder="admin@barakostore.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required 
-              className="h-14 border-slate-200 bg-white rounded-2xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0 px-4 transition-all"
+              icon={Mail}
+              className="h-14 font-medium"
             />
           </div>
 
@@ -69,11 +70,12 @@ export default function LoginPage() {
               <Input 
                 id="password" 
                 type={showPassword ? "text" : "password"} 
-                placeholder="Min. 8 characters" 
+                placeholder="••••••••" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required 
-                className="h-14 border-slate-200 bg-white rounded-2xl text-slate-900 focus-visible:ring-primary focus-visible:ring-offset-0 pr-12 px-4 transition-all"
+                icon={Key}
+                className="h-14 font-medium"
               />
               <button 
                 type="button" 
@@ -95,8 +97,9 @@ export default function LoginPage() {
 
           <Button 
             type="submit" 
-            className="h-14 w-full rounded-2xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all" 
+            className="h-14 w-full text-lg" 
             disabled={loading}
+            icon={loading ? Loader2 : ArrowRight}
           >
             {loading ? "Logging in..." : "Login"}
           </Button>

@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Customer, CustomerStatus } from '@/types/customer';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, User, Mail, Phone, MapPin, Activity, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/shared/Logo';
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -60,8 +61,13 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:max-w-lg p-0 rounded-lg border-none bg-white dark:bg-card shadow-xl overflow-hidden [&>button]:hidden">
         
+        {/* Brand Section */}
+        <div className="pt-8 px-6 flex justify-center border-b border-slate-50 dark:border-slate-800 pb-4">
+          <Logo size="md" clickable={false} />
+        </div>
+
         {/* Header Section */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <DialogHeader className="space-y-1.5 text-left">
@@ -72,12 +78,13 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
               Enter the details of the customer
             </p>
           </DialogHeader>
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-1"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            className="text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
         </div>
         
         {/* Form Body */}
@@ -89,9 +96,10 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
               <Input 
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
-                placeholder="e.g. Ahmed Ali"
+                icon={User}
+                placeholder="Ahmed Ali"
                 required
+                className="h-11"
               />
             </div>
             
@@ -101,9 +109,10 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                icon={Mail}
                 placeholder="example@email.com"
                 required
+                className="h-11"
               />
             </div>
 
@@ -113,15 +122,16 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
                 <Input 
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                  icon={Phone}
                   placeholder="+252..."
+                  className="h-11"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm font-bold text-slate-700 dark:text-slate-200">Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as CustomerStatus })}>
-                  <SelectTrigger className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm transition-all text-slate-900 dark:text-white">
+                  <SelectTrigger icon={Activity} className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-md border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-card">
@@ -137,8 +147,9 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
               <Input 
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="h-11 w-full bg-slate-50 dark:bg-background border-slate-200 dark:border-slate-800 rounded-md focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary shadow-sm transition-all text-slate-900 dark:text-white"
+                icon={MapPin}
                 placeholder="Customer address..."
+                className="h-11"
               />
             </div>
 
@@ -148,19 +159,20 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
           <div className="px-6 py-4 bg-white dark:bg-card border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 flex-col sm:flex-row">
             <Button 
               type="button" 
-              variant="outline" 
+              variant="secondary" 
               onClick={onClose} 
-              className="h-11 px-5 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-background text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+              icon={X}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={loading} 
-              className="h-11 px-6 rounded-md bg-primary hover:bg-primary/90 text-white font-medium shadow-sm transition-all w-full sm:w-auto"
+              icon={loading ? Loader2 : (initialData ? User : Plus)}
+              className="w-full sm:w-auto"
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initialData ? 'Save Changes' : 'Add Customer'}
+              {loading ? 'Processing...' : (initialData ? 'Save Changes' : 'Add Customer')}
             </Button>
           </div>
         </form>

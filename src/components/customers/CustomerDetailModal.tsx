@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Mail, Phone, MapPin, Calendar, ShoppingBag, DollarSign, Loader2, TrendingUp, History, X, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface CustomerDetailModalProps {
   isOpen: boolean;
@@ -37,12 +38,19 @@ export function CustomerDetailModal({ isOpen, onClose, customer }: CustomerDetai
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[760px] p-0 rounded-2xl border-slate-100 dark:border-slate-800 bg-white dark:bg-card shadow-lg overflow-hidden">
+      <DialogContent className="w-[95vw] sm:max-w-[760px] p-0 rounded-2xl border-slate-100 dark:border-slate-800 bg-white dark:bg-card shadow-lg overflow-hidden [&>button]:hidden">
         
         {/* Header Section */}
         <div className="bg-slate-50/50 dark:bg-background/50 p-8 border-b border-slate-100 dark:border-slate-800 relative flex flex-col sm:flex-row items-center gap-6">
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="absolute top-6 right-6 text-slate-400 p-1 h-8 w-8"
+            icon={X}
+          />
           <div className="flex flex-col items-center">
-            <Logo size="lg" clickable={false} showText={false} className="mb-4" />
+            <Logo size="lg" clickable={false} showText={true} className="mb-4" />
             <Avatar className="h-14 w-14 rounded-xl border-2 border-white dark:border-slate-800 bg-primary text-white text-xl font-semibold shadow-md">
               <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
             </Avatar>
@@ -113,7 +121,7 @@ export function CustomerDetailModal({ isOpen, onClose, customer }: CustomerDetai
             {/* Right Col: Metrics */}
             <div className="space-y-6">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2">Engagement Metrics</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-background/50">
                   <ShoppingBag className="h-5 w-5 text-primary mb-3" />
                   <p className="text-xs font-medium text-slate-500 mb-1">Total Orders</p>

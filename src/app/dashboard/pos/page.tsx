@@ -73,7 +73,7 @@ export default function POSPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] gap-6 lg:flex-row overflow-hidden pb-4">
+    <div className="flex flex-col lg:h-[calc(100vh-130px)] gap-6 lg:flex-row lg:overflow-hidden pb-4">
       {/* 1. PRODUCT SECTION */}
       <div className="flex flex-col flex-1 gap-6 overflow-hidden">
         {/* Header/Filter Bar */}
@@ -82,11 +82,11 @@ export default function POSPage() {
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Point of Sale</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Select products to build an order</p>
           </div>
-          <div className="relative w-full sm:w-[320px]">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <div className="w-full sm:w-[320px]">
              <Input 
                 placeholder="Search products or scan SKU..." 
-                className="pl-10 h-11 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-card shadow-sm text-sm"
+                icon={Search}
+                className="h-11 rounded-xl"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
              />
@@ -116,7 +116,7 @@ export default function POSPage() {
                     </div>
                   )}
                   <div className="absolute top-2 right-2">
-                    <Badge className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-[#3338A0] dark:text-white font-bold text-[10px] border-none shadow-sm">
+                    <Badge className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-[#0B1221] dark:text-white font-bold text-[10px] border-none shadow-sm">
                       {product.stockQuantity} {product.unit} left
                     </Badge>
                   </div>
@@ -127,7 +127,7 @@ export default function POSPage() {
                       <p className="font-bold text-slate-900 dark:text-white text-base leading-tight">{product.name}</p>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{product.category}</p>
                     </div>
-                    <p className="text-xl font-black text-[#3338A0] dark:text-white">${product.price.toFixed(2)}</p>
+                    <p className="text-xl font-black text-[#0B1221] dark:text-white">${product.price.toFixed(2)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -146,16 +146,16 @@ export default function POSPage() {
       </div>
 
       {/* 2. CHECKOUT SECTION */}
-      <div className="w-full lg:w-[400px] shrink-0 h-full flex flex-col">
+      <div className="w-full lg:w-[400px] shrink-0 flex flex-col lg:h-full">
         <Card className="flex flex-col h-full border border-slate-100 dark:border-slate-800/50 shadow-xl rounded-[24px] overflow-hidden bg-white dark:bg-card">
           <CardHeader className="border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex flex-row items-center justify-between bg-slate-50/50 dark:bg-card">
             <div className="flex items-center gap-3">
-               <div className="h-8 w-8 rounded-lg bg-[#3338A0]/10 flex items-center justify-center">
-                 <ShoppingCart className="h-4 w-4 text-[#3338A0]" />
+               <div className="h-8 w-8 rounded-lg bg-[#0B1221]/10 flex items-center justify-center">
+                 <ShoppingCart className="h-4 w-4 text-[#0B1221]" />
                </div>
                <CardTitle className="text-base font-bold text-slate-900 dark:text-white">Active Cart</CardTitle>
             </div>
-            <Badge className="bg-[#3338A0] text-white rounded-full px-2.5 py-0.5 text-[10px] border-none shadow-none font-black uppercase">
+            <Badge className="bg-[#0B1221] text-white rounded-full px-2.5 py-0.5 text-[10px] border-none shadow-none font-black uppercase">
               {cart.length} line items
             </Badge>
           </CardHeader>
@@ -163,11 +163,11 @@ export default function POSPage() {
           <CardContent className="flex-1 overflow-hidden flex flex-col p-0">
             {/* Customer Attachment */}
             <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800">
-               <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-[#3338A0] transition-colors" />
+               <div className="group">
                   <Input 
                     placeholder="Attach Customer (Optional)" 
-                    className="pl-10 h-10 bg-slate-50 dark:bg-slate-900 border-none rounded-xl text-sm font-medium focus-visible:ring-1 focus-visible:ring-[#3338A0]/30"
+                    icon={User}
+                    className="h-11 bg-slate-50 dark:bg-slate-900 border-none rounded-xl text-sm font-medium focus-visible:ring-1 focus-visible:ring-[#0B1221]/30"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                   />
@@ -190,32 +190,35 @@ export default function POSPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-slate-900 dark:text-white text-sm truncate leading-none">{item.name}</p>
-                      <p className="text-xs font-bold text-[#3338A0] dark:text-slate-400 mt-1.5">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="text-xs font-bold text-[#0B1221] dark:text-slate-400 mt-1.5">${(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                     
-                    <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900 rounded-xl p-0.5 border border-slate-100 dark:border-slate-800">
-                      <button 
-                        className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm text-slate-500 transition-all disabled:opacity-30"
+                    <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900 rounded-2xl p-0.5 border border-slate-100 dark:border-slate-800">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        icon={Minus}
+                        className="h-7 w-7 text-slate-500"
                         onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
+                      />
                       <span className="w-6 text-center text-xs font-black text-slate-900 dark:text-white">{item.quantity}</span>
-                      <button 
-                        className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm text-slate-500 transition-all disabled:opacity-30"
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        icon={Plus}
+                        className="h-7 w-7 text-slate-500"
                         disabled={item.quantity >= item.stockQuantity}
                         onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
+                      />
                     </div>
                     
-                    <button 
-                      className="h-8 w-8 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      icon={Trash2}
+                      className="h-8 w-8 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100"
                       onClick={() => removeFromCart(item.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    />
                   </div>
                 ))}
                 
@@ -244,26 +247,26 @@ export default function POSPage() {
               </div>
               <div className="flex justify-between items-center pt-2">
                 <span className="text-sm font-bold text-slate-900 dark:text-white">Amount Due</span>
-                <span className="text-4xl font-black text-[#3338A0] dark:text-white tracking-tighter">${cartTotal.toFixed(2)}</span>
+                <span className="text-4xl font-black text-[#0B1221] dark:text-white tracking-tighter">${cartTotal.toFixed(2)}</span>
               </div>
             </div>
             
             <div className="flex w-full gap-3">
               <Button 
-                variant="outline" 
-                className="flex-1 h-12 rounded-full border-slate-200 dark:border-slate-800 text-slate-500 font-bold hover:bg-white dark:hover:bg-slate-800 shadow-none" 
+                variant="secondary" 
+                icon={Trash2}
+                className="flex-1" 
                 onClick={clearCart}
               >
                 Clear
               </Button>
               <Button 
-                className={cn(
-                  "flex-[2] h-12 rounded-full bg-[#3338A0] text-white font-bold text-base shadow-xl shadow-[#3338A0]/20 transition-all active:scale-[0.98]",
-                  cart.length === 0 && "opacity-50 cursor-not-allowed shadow-none"
-                )}
+                className="flex-[2]"
+                disabled={cart.length === 0}
                 onClick={handleCheckout}
+                icon={CreditCard}
               >
-                <CreditCard className="mr-2 h-4 w-4" /> Checkout
+                Checkout
               </Button>
             </div>
           </CardFooter>
@@ -274,9 +277,9 @@ export default function POSPage() {
       <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
         <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none shadow-3xl rounded-[32px] bg-white dark:bg-card animate-in zoom-in-95 fade-in duration-300">
           <div className="px-8 pt-10 pb-6 text-center flex flex-col items-center">
-            {/* ACCESSIBILITY: DialogTitle & DialogDescription are now present */}
-            <div className="h-16 w-16 rounded-[24px] bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-6">
-              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+            {/* Logo in Receipt */}
+            <div className="mb-6">
+              <Logo size="lg" clickable={false} />
             </div>
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white text-center">
@@ -311,7 +314,7 @@ export default function POSPage() {
             <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-[24px] border border-slate-100 dark:border-slate-800">
                <div className="flex justify-between items-center">
                  <span className="text-slate-500 font-medium text-xs uppercase tracking-widest">Total Amount Paid</span>
-                 <span className="text-3xl font-black text-[#3338A0] dark:text-white tracking-tighter">${lastOrder?.total.toFixed(2)}</span>
+                 <span className="text-3xl font-black text-[#0B1221] dark:text-white tracking-tighter">${lastOrder?.total.toFixed(2)}</span>
                </div>
                <div className="flex justify-between items-center pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider italic">Attached Customer: {lastOrder?.customer}</p>
@@ -321,14 +324,18 @@ export default function POSPage() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Button 
-                variant="outline"
-                className="flex-1 h-12 rounded-full border-slate-200 dark:border-slate-800 font-bold text-slate-500" 
+                variant="secondary"
+                className="flex-1" 
                 onClick={() => setIsReceiptOpen(false)}
+                icon={X}
               >
                 Done
               </Button>
-              <Button className="flex-1 h-12 rounded-full bg-slate-900 text-white font-bold shadow-lg shadow-black/10 transition-all hover:bg-black group">
-                <Printer className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" /> Print Receipt
+              <Button 
+                className="flex-1"
+                icon={Printer}
+              >
+                Print Receipt
               </Button>
             </div>
           </div>
